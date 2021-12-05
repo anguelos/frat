@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Canvas Layers Test</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="/grouting.js"></script>
+    <script>
+        createUI("{{page_id}}");
+    </script>
+
+</head>
+<body>
+<section>
+    <div id="cover" style="{position: fixed; height: 100%; width: 100%; top:0; left: 0; background: #000; z-index:9999;}"></div>
+    <div id="navigation_div">
+        <table border=1>
+            <tr><td align="center" colspan="8">
+                <b>Selected Item</b>
+            </td><td align="center" colspan="4">
+                <b>Navigation</b>
+            </td><td colspan="7"  align="center" >
+                    <b>Object Types</b>
+            </td></tr>
+
+            <tr><td>
+                <canvas id="selected_image_canvas" height="30px" width="150">
+                    This text is displayed if your browser does not support HTML5 Canvas.
+                </canvas>
+            <td/><td>
+                ID:
+            </td><td>
+                <div id="div_selected_id"></div>
+            </td><td>
+                Caption Type:
+            </td><td>
+                <div id="div_selected_prefix"></div>
+            </td><td>
+                Caption:
+            </td><td>
+                <div id="div_selected_caption"></div>
+            </td><td>
+                <button id="btn_previous" onclick="save_preferences();window.location='/{{previous_id}}';">Previous</button>
+            </td><td>
+                <button id="btn_images" onclick="save_preferences();window.location='/';">Images</button>
+            </td><td>
+                <button id="btn_next" onclick="save_preferences();window.location='/{{next_id}}';">Next</button>
+            </td><td>
+                <button id="btn_help" onclick="toggle_settings();save_preferences();">Settings</button>
+            </td><td>
+                <button id="btn_textblock" onclick="update_new_caption_prefix('B');save_preferences();">Textblock</button>
+            </td><td>
+                <button id="btn_textline" onclick="update_new_caption_prefix('L');save_preferences();">Textline</button>
+            </td><td>
+                <button id="btn_word" onclick="update_new_caption_prefix('W');save_preferences();">Word</button>
+            </td><td>
+                <button id="btn_graphic" onclick="update_new_caption_prefix('G');save_preferences();">Graphic</button>
+            </td><td>
+                <button id="btn_custom" onclick="update_new_caption_prefix('');save_preferences();">Custom</button>
+            </td><td>
+                Current type:
+            </td><td align="center">
+                    <div id="new_caption_prefix">G</div>
+            </td></tr>
+        </table>
+    </div>
+    <div id="settingsdiv">
+        <p><b>User:</b>
+        <table><tr><td>User:</td><td><div id="user_name">N/A</div></td><td>
+            <button onclick="user_name=window.prompt('Username',user_name);document.getElementById('user_name').innerHTML=user_name;">Edit</button>
+        </td></tr></table>
+        <p><b>Shortcut Keys</b>
+        <table id="keys_table">
+            <tr><th>Action</th><th>Shortcut Symbol</th><th>Shortcut Code</th></tr>
+            <tr><td> Edit Selected     </td><td>  13 </td><td>   </td></tr>
+            <tr><td> Edit Next         </td><td> 101 </td><td> e </td></tr>
+            <tr><td> Select Next       </td><td> 110 </td><td> n </td></tr>
+            <tr><td> Select Previous   </td><td> 112 </td><td> p </td></tr>
+            <tr><td> Delete Selected   </td><td> 100 </td><td> d </td></tr>
+            <tr><td> Undelete Selected </td><td> 122 </td><td> z </td></tr>
+            <tr><td> Set Caption Type  </td><td> 099 </td><td> c </td></tr>
+            <tr><td> Settings          </td><td> 104 </td><td> h </td></tr>
+        </table>
+        </p>
+        <p/><b>Color Preferences</b>
+        <table id="prefix_color_table" border="1">
+            <tr><th>Object Type</th><th>Caption Prefix</th><th colspan="2">Box Color</th><th>Empty Box Color</th><th><button onclick="set_colors();">Reset Defaults</button></th></tr>
+
+            <tr><td> Words  </td><td> W </td><td><div id="w_prefix_color_empty">#FF0000</div></td><td><button onclick="set_colors('w_prefix_color_empty');">Change</button></td>
+                <td><div id="w_prefix_color_full">#AA0000</div></td><td><button onclick="set_colors('w_prefix_color_full');">Change</button></td><td></td></tr>
+
+            <tr><td> Textlines  </td><td> L </td><td><div id="l_prefix_color_empty">#00FF00</div></td><td><button onclick="set_colors('l_prefix_color_empty');">Change</button></td>
+                <td><div id="l_prefix_color_full">#00AA00</div></td><td><button onclick="set_colors('l_prefix_color_full');">Change</button></td><td></td></tr>
+
+            <tr><td> Graphics  </td><td> G </td><td><div id="g_prefix_color_empty">#0000FF</div></td><td><button onclick="set_colors('g_prefix_color_empty');">Change</button></td>
+                <td><div id="g_prefix_color_full">#0000FF</div></td><td><button onclick="set_colors('g_prefix_color_full');">Change</button></td><td></td></tr>
+
+            <tr><td> Other  </td><td> * </td><td><div id="other_prefix_color_empty">#00FF00</div></td><td><button onclick="set_colors('other_prefix_color_empty');">Change</button></td>
+                <td><div id="other_prefix_color_full">#00FF00</div></td><td><button onclick="set_colors('other_prefix_color_full');">Change</button></td><td></td></tr>
+
+            <tr><td> Transcription  </td><td> N/A </td><td> N/A </td></td><td>
+                <td><div id="transcription_font_color">#00FF00</div></td><td><button onclick="set_colors('transcription_font_color');">Change</button></td><td></td></tr>
+
+            <tr><td>Font Style:</td><td><div id="transcription_font_type">Calibri</div></td><td><button onclick="set_colors('transcription_font_type');">Change</button></td>
+                <td>Font Size:</td><td><div id="transcription_font_size">18pt</div></td><td><button onclick="set_colors('transcription_font_size');">Change</button></td></tr>
+        </table>
+        </p>
+    </div>
+    <div id="canvases_div" style="position:relative; width:400px; height:300px">
+        <canvas id="layer_image"
+            style="z-index: 1;
+            position:absolute;
+            left:0px;
+            top:0px;
+            " height="300px" width="400">
+            This text is displayed if your browser does not support HTML5 Canvas.
+        </canvas>
+        <canvas id="layer_boxes"
+            style="z-index: 2;
+            position:absolute;
+            l+eft:0px;
+            top:0px;
+            " height="300px" width="400">
+            This text is displayed if your browser does not support HTML5 Canvas.
+        </canvas>
+        <canvas id="layer_active"
+            style="z-index: 3;
+            position:absolute;
+            left:0px;
+            top:0px;
+            " height="300px" width="400">
+            This text is displayed if your browser does not support HTML5 Canvas.
+        </canvas>
+        <canvas id="layer_interactive"
+            style="z-index: 4;
+            position:absolute;
+            left:0px;
+            top:0px;
+            " height="300px" width="400">
+            This text is displayed if your browser does not support HTML5 Canvas.
+        </canvas>
+    </div>
+</section>
+</body>
+</html>
