@@ -23,13 +23,13 @@
    float: left;
    position:absolute;
    left:80%;
-   top:10%;
+   top:20%;
    width:20%;
 
 }
 #canvaces{
     left:0px;
-    top:10%;
+    top:20%;
     width:80%;
     height: 80%;
     overflow: scroll;
@@ -82,7 +82,7 @@
             classesUI.write_gui(class_label_values);
             //canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
             alert(JSON.stringify(boxes_and_labels));
-            canvaces = new Canvaces("{{id}}",classesUI,"config_editor","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),config);
+            canvaces = new Canvaces("{{id}}",classesUI,"config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),config);
         }
     </script>
 
@@ -93,6 +93,9 @@
     Class Editor
     </div>
     <div id="config_editor">
+    </div>
+
+    <div id="navigation">
     </div>
 
 

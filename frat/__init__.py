@@ -1,5 +1,6 @@
 #from .web_server import StringGeneratorWebService, load_thumbd
 from .generic_web_server import FratWebServer
+from .version import __version__
 
 import pkgutil
 

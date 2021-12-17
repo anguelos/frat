@@ -24,6 +24,7 @@ from cherrypy.lib import file_generator
 
 frat_gui_js = pkgutil.get_data(__name__, "resources/frat_gui.js").decode("utf-8").encode('utf8')
 frat_webpage_jinja2 = pkgutil.get_data(__name__, "resources/frat_webpage.jinja2").decode("utf-8")
+empty_page_json = pkgutil.get_data(__name__, "resources/empty_page.json").decode("utf-8")
 
 
 def create_thumb(fname, format="png", width=100, height=-1):
@@ -73,7 +74,11 @@ class FratWebServer(object):
     
     def render_gt(self, image_id):
         cherrypy.response.headers['Content-Type'] = "application/json"
-        return open(self.json_paths[self.image_names_to_idx[image_id]],"r").read().encode('utf8')
+        json_path = self.json_paths[self.image_names_to_idx[image_id]]
+        if(os.path.exists(json_path)):
+            return open(json_path,"r").read().encode('utf8')
+        else:
+            return empty_page_json.encode("utf8")
 
     def render_html(self, image_id):
         cherrypy.response.headers['Content-Type'] = "text/html"
@@ -86,13 +91,20 @@ class FratWebServer(object):
             res+=f'<tr><td>{n}</td><td><a href="/{name}.html"><img src="/{name}.thumb.png"></a></td></tr>\n'
         res+="</table></body></html>"
         return res
+    def render_idlist(self):
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        all_ids = [v[1] for v in sorted([(v, k) for k, v  in self.image_names_to_idx.items()])]
+        return str.encode(json.dumps(all_ids))
+        
 
 
     @cherrypy.popargs('url_path')
     def GET(self, url_path=""):
         print("GETTING:",repr(url_path))
         page_id = url_path.split("/")[-1].split(".")[0]
-        if url_path.endswith(".thumb.png"):
+        if page_id == "page_id_list":
+            return self.render_idlist()
+        elif url_path.endswith(".thumb.png"):
             if page_id in self.image_names_to_idx:
                 return self.render_thumb(page_id)
             else:
@@ -123,7 +135,7 @@ class FratWebServer(object):
         elif url_path=="":
             return self.render_index()
         else:
-            raise cherrypy.HTTPError(404,"Resource "+repr(page_id)+" not understood")
+            raise cherrypy.HTTPError(404,"Resource :"+repr(url_path)+"  id:"+repr(page_id)+" not understood")
 
     @cherrypy.tools.accept(media='application/json')
     def PUT(self, url_path):

@@ -1,13 +1,16 @@
 function ui_warn(msg){
     console.warn(msg);
 }
+function ui_error(msg){
+    alert(msg);
+}
 function dbg_log(msg){
     console.warn(JSON.stringify(msg));
 }
 
 
 class Canvaces{
-    constructor(id,class_selection,config_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
+    constructor(id,class_selection,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
         this.page_id = id;
         this.class_selection_ui = class_selection
         this.class_selection_ui.frat_ui=this;
@@ -30,13 +33,16 @@ class Canvaces{
         this.canvaces_div = document.getElementById(canvaces_divid);
         this.selected_div = document.getElementById(selected_divid);
         this.config_div = document.getElementById(config_divid);
+        this.navigation_div = document.getElementById(navigation_divid);
         this.create_canvaces();
         this.create_interactive();
         this.create_commands();
         this.create_config();
+        this.create_navigation();
         
         this.img.onload = function(){
             self.initialise_from_image();
+            self.cmd_reload();
         }
         this.img.src = img_url;
 
@@ -129,7 +135,7 @@ class Canvaces{
         let uniqueItems = [...new Set(items)]
     }
     cmd_help_config(){
-        alert("help TODO");
+        ui_error("cmd_help_config: help TODO");
 
     }
     cmd_save(){
@@ -371,6 +377,9 @@ class Canvaces{
         self.create_selection();
         self.set_active([]);
         self.add_keylisteners();
+        self.onunload = function(){
+            self.cmd_save();
+        }
     }
     add_keylisteners(){
         var self=this;
@@ -423,7 +432,7 @@ class Canvaces{
                     self.cmd_merge_selected();
                     break;                    
                 default:
-                    alert("Unknown code:"+shortcut);
+                    ui_error("Unknown code:"+shortcut);
             }
 
         };
@@ -481,8 +490,6 @@ class Canvaces{
         this.sort_boxes();
     }
     set_classes(values){
-        //let values=JSON.parse(classes_json);
-        alert("set_classes:"+JSON.stringify(values));
         this.class_names = []
         this.class_colors = []
         for(let class_data of values){
@@ -683,8 +690,6 @@ class Canvaces{
                 self.drag_begin_y=mousePos.y;
                 self.mouse_mode="new";
             }
-
-            //alert("X:"+self.drag_begin_x+"   Y:"+self.drag_begin_y)
         }, false);
 
         this.cnv_interactive.addEventListener('mouseup', function(evt) {
@@ -738,6 +743,45 @@ class Canvaces{
     create_config(){
         this.config_div.innerHTML='<table><tr><td id="user_name">totos</td></tr></table>'
     }
+    create_navigation(){
+        this.navigation_div.innerHTML="Navigation Loading";
+        var self=this;
+        var xhr = new XMLHttpRequest();
+        let url="/page_id_list.json";
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.onload = function() {
+          var status = xhr.status;
+          if (status === 200) {
+            //callback(null, xhr.response);
+            ui_warn("Reloading gt! Responce: '"+JSON.stringify(xhr.response)+"'");
+            //data=JSON.parse(xhr.response);
+            let tbl_nav=document.createElement("table");
+            let tr_nav=document.createElement("tr");
+            self.page_links=[]
+            for(let page_id of xhr.response){
+                let td_page=document.createElement("td")
+                let a_page=document.createElement("a")
+                a_page.href='/'+page_id+'.html'
+                a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
+                td_page.appendChild(a_page);
+                tr_nav.appendChild(td_page);
+                self.page_links.push(a_page);
+                if(page_id==self.page_id){
+                    this.current_page_link=a_page
+                }
+            }
+            tbl_nav.appendChild(tr_nav)
+            self.navigation_div.innerHTML='';
+            self.navigation_div.appendChild(tbl_nav);
+
+          } else {
+            ui_warn("Reloading gt failed status:"+status+" responce:'"+xhr.response+"'");
+          }
+        };
+        xhr.send();
+    }
+
     create_canvaces(){
         let width=1000;
         let height=1000;
@@ -838,7 +882,7 @@ class ClassIdEditor{
             if(self.dom_edit_tablebody.rows.length > 1){
                 self.dom_edit_tablebody.deleteRow(-1);
             }else{
-                alert("At least one class is required, have "+self.dom_edit_tablebody.rows.length);
+                ui_error("At least one class is required, have "+self.dom_edit_tablebody.rows.length);
             }
         }
         this.dom_edit_tablefoot.appendChild(this.btn_remove);
@@ -867,7 +911,7 @@ class ClassIdEditor{
                 }
                 self.draw_class_choices();
             }else{
-                alert("Can not save Class Ids");
+                ui_error("Can not save Class Ids");
             }
         }
         this.dom_edit_tablefoot.appendChild(this.btn_save);
@@ -921,14 +965,14 @@ class ClassIdEditor{
         let colors = new Set();
         for(let i=0; i < values.length; i++){
             if(values[i].name==""){
-                alert("Empty name");
+                ui_error("gui_values_ok: Empty name");
                 return 0;
             }
             names.add(values[i].name);
             colors.add(values[i].color);
         }
         if((names.size!=values.length) ||(names.size!=colors.size)){
-            alert("Sizes:"+values.length+","+names.size+","+colors.size);
+            ui_error("gui_values_ok: Sizes:"+values.length+","+names.size+","+colors.size);
             return 0;
         }
         return 1;
@@ -940,7 +984,7 @@ class ClassIdEditor{
             this.class_buttons[i].disabled = (i==choice);
         }
         if(this.frat_ui===null){
-            alert("FratUI unlinked")
+            ui_error("set_choice: FratUI unlinked")
         }else{
             this.frat_ui.set_selection_class(this.selection);
         }
