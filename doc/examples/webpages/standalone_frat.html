@@ -40,7 +40,7 @@
 <meta charset="UTF-8" />
 <title>Canvas Layers Test</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/frat_gui.js"></script>
+    <script src="../../../frat/resources/frat_gui.js"></script>
     <script>
         var class_label_values = [{name:"No Class", color:"#000000"},
                                   {name:"Textura", color:"#2f4f4f"},
@@ -69,7 +69,6 @@
                   {ltrb:[200, 1050, 450, 1100], transcription:"another text block", class_id:11},
                   {ltrb:[200, 1150, 450, 1200], transcription:"another text block", class_id:12},
                   ];
-        var boxes_and_labels={rects:boxes, classes:class_label_values};
         var config={caption_font:"18pt Calibri",
                     shortcut_code_next: "tab",
                     shortcut_code_previous: "shift+tab",
@@ -80,9 +79,7 @@
             alert("Active" + document.getElementById("active").innerHTML)
             classesUI = new ClassIdEditor(class_label_values, "class_editor", "class_selector");
             classesUI.write_gui(class_label_values);
-            //canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
-            alert(JSON.stringify(boxes_and_labels));
-            canvaces = new Canvaces("{{id}}",classesUI,"config_editor","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),config);
+            canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","../../../sample_data/multifont1.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
         }
     </script>
 
@@ -92,8 +89,6 @@
     <div id="class_editor">
     Class Editor
     </div>
-    <div id="config_editor">
-    </div>
 
 
 <div id="class_selector">
@@ -102,6 +97,7 @@
 <div>
     <table><tr>
         <td>
+            style="position:relative;width:80%;height: 90%; background-color: magenta;"
             <div id="canvaces" >
 
                 Canvaces

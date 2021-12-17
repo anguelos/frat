@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+import base64
+import json
+import random
+import string
+import cherrypy  # also routes are needed
+import cv2
+import PIL
+import hashlib
+import jinja2
+import tqdm
+import pkgutil
+from collections import OrderedDict
+import zlib
+import pathlib
+import fargv
+import sys
+import os
+import io
+from PIL import Image
+from cherrypy.lib import file_generator
+from frat import FratWebServer
+
+
+if __name__ == "__main__":
+    p={"images":[set([]), "the images to be groundtruthed"]}
+    p, _ = fargv.fargv(p)
+    conf = {
+        '/': {
+        'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True,
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Content-Type', 'text/plain')],
+        }
+    }
+    cherrypy.quickstart(FratWebServer(p.images), '/', conf)
