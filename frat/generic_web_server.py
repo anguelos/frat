@@ -86,7 +86,7 @@ class FratWebServer(object):
 
     def render_index(self):
         cherrypy.response.headers['Content-Type'] = "text/html"
-        res="<html><body><table>"
+        res=f"<html><body><table>"
         for n, name in sorted([(n, name) for name, n in self.image_names_to_idx.items()]):
             res+=f'<tr><td>{n}</td><td><a href="/{name}.html"><img src="/{name}.thumb.png"></a></td></tr>\n'
         res+="</table></body></html>"
@@ -119,7 +119,6 @@ class FratWebServer(object):
                 return self.render_html(page_id)
             else:
                 raise cherrypy.HTTPError(404,"Groundtruth "+repr(page_id)+" not registered")
-
         elif url_path.endswith(".json"):
             if page_id in self.image_names_to_idx:
                 return self.render_gt(page_id)

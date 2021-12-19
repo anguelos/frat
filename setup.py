@@ -11,6 +11,8 @@ setup(
     name='frat',
     version=main_ns['__version__'],
     packages=['frat'],
+    package_data={'frat': ['resources/*.js', 'resources/*.json', 'resources/*.jinja2']},
+    include_package_data=True,
     scripts=['bin/fratv2'],
     license='GPLv3',
     author='Anguelos Nicolaou',
