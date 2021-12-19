@@ -4,6 +4,7 @@ import random
 import string
 import cherrypy  # also routes are needed
 import cv2
+import PIL
 import hashlib
 import jinja2
 import tqdm
