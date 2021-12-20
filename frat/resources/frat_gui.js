@@ -15,12 +15,13 @@ class Canvaces{
         this.class_selection_ui = class_selection
         this.class_selection_ui.frat_ui=this;
         this.config = config;
-        this.config={caption_font:"18pt Calibri",
+        this.config={caption_font:"Calibri",
+                    caption_font_size:24,
                     shortcut_code_next: "n",
                     shortcut_code_previous: "shift+n",
                     shortcut_code_delete: "delete",
                     shortcut_code_edit: "enter",
-                    gui_scale:0.5
+                    gui_scale:1.0
                 }
         var self = this;
         this.active = [];
@@ -40,14 +41,13 @@ class Canvaces{
         this.create_commands();
         this.create_config();
         this.create_navigation();
-        
         this.img.onload = function(){
             self.initialise_from_image();
             self.cmd_reload();
-            alert("Widths:"+window.innerWidth+" ,"+window.outerWidth);
+            this.update_scales();
         }
         this.img.src = img_url;
-        this.update_scales();
+        
     }
     update_scales(){
         this.detected_scale = window.innerWidth/window.outerWidth;
@@ -62,6 +62,7 @@ class Canvaces{
         this.commands_div.style.zoom = this.detected_scale*this.config.gui_scale;
         this.class_selection_ui.dom_selector_div.style.zoom = this.detected_scale*this.config.gui_scale;
         this.selected_div.style.zoom = this.detected_scale*this.config.gui_scale;
+        this.draw_boxes();
     }
     cmd_select_next(){
         if(this.rect_LTRB.length>0){
@@ -189,13 +190,17 @@ class Canvaces{
         xhr.send();
     }
     cmd_zoomin(){
-        this.canvaces_div.style.zoom=Math.min(this.canvaces_div.style.zoom*1.2, 4.0);
+        this.config.gui_scale = Math.min(this.config.gui_scale*1.2, 4.0);
+        this.update_scales();
+        //this.canvaces_div.style.zoom=Math.min(this.canvaces_div.style.zoom*1.2, 4.0);
     }
     cmd_zoomout(){
-        this.canvaces_div.style.zoom=Math.max(this.canvaces_div.style.zoom*0.8, 0.2);
+        this.config.gui_scale = Math.max(this.config.gui_scale*.8, .2);
+        this.update_scales();
     }
     cmd_zoomreset(){
-        this.canvaces_div.style.zoom=1.0;
+        this.config.gui_scale=1.0;
+        this.update_scales();
     }
     create_commands(){
         var self = this;
@@ -553,7 +558,14 @@ class Canvaces{
         this.ctx_boxes.globalAlpha = 1.0;
         this.ctx_boxes.strokeStyle = "black";
         this.ctx_boxes.fillStyle = "black";
-        this.ctx_boxes.font = self.config.caption_font;
+        let fnt="" + Math.round(this.config.caption_font_size*this.config.gui_scale)+"pt "+this.config.caption_font;
+        dbg_log("Sizes:");
+        dbg_log(this.config.caption_font_size);
+        dbg_log(this.config.gui_scale);
+        dbg_log(this.config.caption_font_size*self.config.gui_scale);
+        dbg_log(Math.round(self.config.caption_font_size*self.config.gui_scale));
+        dbg_log(fnt);
+        this.ctx_boxes.font = fnt;
         this.ctx_boxes.shadowColor = "black";
         this.ctx_boxes.shadowBlur=7;
         this.ctx_boxes.lineWidth=5;
