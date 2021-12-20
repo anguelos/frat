@@ -20,6 +20,7 @@ class Canvaces{
                     shortcut_code_previous: "shift+n",
                     shortcut_code_delete: "delete",
                     shortcut_code_edit: "enter",
+                    gui_scale:0.5
                 }
         var self = this;
         this.active = [];
@@ -43,9 +44,24 @@ class Canvaces{
         this.img.onload = function(){
             self.initialise_from_image();
             self.cmd_reload();
+            alert("Widths:"+window.innerWidth+" ,"+window.outerWidth);
         }
         this.img.src = img_url;
-
+        this.update_scales();
+    }
+    update_scales(){
+        this.detected_scale = window.innerWidth/window.outerWidth;
+        //this.detected_scale = window.outerWidth/window.innerWidth;
+        //const transform = "scale("+this.detected_scale+");";
+        //const transform = "translate("+(this.detected_scale*100-100)+",0);";
+        //alert("transform:"+transform);
+        //this.navigation_div.style.transform = transform;
+        //this.commands_div.style.zoom = transform;
+        //this.class_selection_ui.dom_selector_div.style.zoom = transform;
+        this.navigation_div.style.transform = this.detected_scale*this.config.gui_scale;
+        this.commands_div.style.zoom = this.detected_scale*this.config.gui_scale;
+        this.class_selection_ui.dom_selector_div.style.zoom = this.detected_scale*this.config.gui_scale;
+        this.selected_div.style.zoom = this.detected_scale*this.config.gui_scale;
     }
     cmd_select_next(){
         if(this.rect_LTRB.length>0){
@@ -413,6 +429,12 @@ class Canvaces{
                 case "shift+shift":
                 case "shift+ctrl+shift":
                     break;
+                case "=+ctrl":
+                    self.update_scales();
+                    break;
+                    case "-+ctrl":
+                        self.update_scales();
+                        break;
                 case self.config.shortcut_code_next:
                     self.cmd_select_next();
                     break;
@@ -430,9 +452,10 @@ class Canvaces{
                     break;
                 case self.config.shortcut_code_merge:
                     self.cmd_merge_selected();
-                    break;                    
+                    break;
                 default:
-                    ui_error("Unknown code:"+shortcut);
+
+                    ui_warn("Unknown code:"+shortcut);
             }
 
         };
@@ -984,7 +1007,7 @@ class ClassIdEditor{
             this.class_buttons[i].disabled = (i==choice);
         }
         if(this.frat_ui===null){
-            ui_error("set_choice: FratUI unlinked")
+            ui_warn("set_choice: FratUI unlinked")
         }else{
             this.frat_ui.set_selection_class(this.selection);
         }

@@ -27,6 +27,32 @@
    width:20%;
 
 }
+#navigation{
+    left:0px;
+    top:0px;
+    width:100%;
+    height: 10%;
+    overflow: scroll;
+    position:absolute;
+}
+#class_selector{
+    left:0px;
+    top:10%;
+    width:100%;
+    height: 5%;
+    overflow: hide;
+    position:absolute;
+}
+
+#command_buttons{
+    left:0px;
+    top:15%;
+    width:100%;
+    height: 5%;
+    overflow: hide;
+    position:absolute;
+}
+
 #canvaces{
     left:0px;
     top:20%;
@@ -77,11 +103,9 @@
         };
         var classesUI = null;
         function page_load(){
-            alert("Active" + document.getElementById("active").innerHTML)
             classesUI = new ClassIdEditor(class_label_values, "class_editor", "class_selector");
             classesUI.write_gui(class_label_values);
             //canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
-            alert(JSON.stringify(boxes_and_labels));
             canvaces = new Canvaces("{{id}}",classesUI,"config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),config);
         }
     </script>
