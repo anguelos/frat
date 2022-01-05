@@ -7,16 +7,22 @@ function ui_error(msg){
 function dbg_log(msg){
     console.warn(JSON.stringify(msg));
 }
+function dbg_show(msg){
+    alert(JSON.stringify(msg));
+}
 
 
 class Canvaces{
-    constructor(id,class_selection,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
+    constructor(id,class_selection,transcribe_modal_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
         this.page_id = id;
         this.class_selection_ui = class_selection
         this.class_selection_ui.frat_ui=this;
         this.config = config;
         this.config={caption_font:"Calibri",
                     caption_font_size:24,
+                    caption_font_shadow_color:"white",
+                    caption_font_color:"black",
+                    all_caption_alpha:0.3,
                     shortcut_code_next: "n",
                     shortcut_code_previous: "shift+n",
                     shortcut_code_delete: "delete",
@@ -36,6 +42,7 @@ class Canvaces{
         this.selected_div = document.getElementById(selected_divid);
         this.config_div = document.getElementById(config_divid);
         this.navigation_div = document.getElementById(navigation_divid);
+        this.create_transcribe_modal(transcribe_modal_divid);
         this.create_canvaces();
         this.create_interactive();
         this.create_commands();
@@ -48,6 +55,53 @@ class Canvaces{
         }
         this.img.src = img_url;
         
+    }
+    open_transcriber(){
+        if(this.active.length==1){
+            var active = this.active[0];
+            var self = this;
+            this.transcribe_modal_txt.value=this.rect_captions[active];
+            this.transcribe_modal.style.display=block;
+            this.transcribe_modal_close.onmousedown = function(){
+                alert("clicked");
+                self.rect_captions[active]=this.transcribe_modal_txt.value;
+                self.transcribe_modal.style.display = "none";
+            }
+        }
+    }
+    create_transcribe_modal(transcribe_modal_divid){
+        var self=this;
+        this.transcribe_modal
+        this.transcribe_modal = document.getElementById(transcribe_modal_divid);
+        this.transcribe_modal.innerHTML="";
+        this.transcribe_modal.classList.add('transcribe_modal');
+
+        this.transcribe_modal_contents = document.createElement("div");
+        this.transcribe_modal_contents.classList.add('transcribe_modal_content');
+        this.transcribe_modal.appendChild(this.transcribe_modal_contents);
+
+        this.transcribe_modal_close = document.createElement("span");
+        this.transcribe_modal_close.innerHTML = "&times;";
+        this.transcribe_modal_close.classList.add("close_transcribe_modal");
+        this.transcribe_modal_contents.appendChild(this.transcribe_modal_close);
+        
+        this.transcribe_modal_txt = document.createElement("input");
+        this.transcribe_modal_txt.setAttribute("type", "text");
+        this.transcribe_modal_txt.setAttribute("value", "THIS should never be seen!");
+        this.transcribe_modal_contents.appendChild(this.transcribe_modal_txt);
+        
+
+        dbg_show(["Children#:", this.transcribe_modal.childNodes])
+        this.transcribe_modal.style.display=null;
+        //this.transcribe_modal_contents.style.display=null;
+        //this.transcribe_modal_contents.style.visibility=0;
+
+        //window.onclick = function(e){
+        //    if(e.target == modal){
+        //        modal.style.display = "none"
+        //    }
+        //}
+
     }
     update_scales(){
         this.detected_scale = window.innerWidth/window.outerWidth;
@@ -63,6 +117,9 @@ class Canvaces{
         this.class_selection_ui.dom_selector_div.style.zoom = this.detected_scale*this.config.gui_scale;
         this.selected_div.style.zoom = this.detected_scale*this.config.gui_scale;
         this.draw_boxes();
+    }
+    cmd_edit_selected(){
+        this.open_transcriber();
     }
     cmd_select_next(){
         if(this.rect_LTRB.length>0){
@@ -383,6 +440,11 @@ class Canvaces{
         self.cnv_boxes.height = self.img.height;
         self.ctx_boxes = self.cnv_boxes.getContext("2d");
 
+        self.cnv_transcriptions.width = self.img.width;
+        self.cnv_transcriptions.height = self.img.height;
+        self.ctx_transcriptions = self.cnv_transcriptions.getContext("2d");
+
+
         self.cnv_active.width = self.img.width;
         self.cnv_active.height = self.img.height;
         self.ctx_active = self.cnv_active.getContext("2d");
@@ -437,9 +499,9 @@ class Canvaces{
                 case "=+ctrl":
                     self.update_scales();
                     break;
-                    case "-+ctrl":
-                        self.update_scales();
-                        break;
+                case "-+ctrl":
+                    self.update_scales();
+                    break;
                 case self.config.shortcut_code_next:
                     self.cmd_select_next();
                     break;
@@ -555,9 +617,13 @@ class Canvaces{
                 }
             }
         }
-        this.ctx_boxes.globalAlpha = 1.0;
-        this.ctx_boxes.strokeStyle = "black";
-        this.ctx_boxes.fillStyle = "black";
+        this.ctx_transcriptions.clearRect(0,0, this.img.width, this.img.height);
+        this.ctx_transcriptions.globalAlpha = this.config.all_caption_alpha;
+        //this.ctx_transcriptions.strokeStyle = this.config.caption_font_shadow_style;//"black";
+        //this.ctx_transcriptions.fillStyle = this.config.caption_font_shadow_style;
+        //this.ctx_transcriptions.fillStyle = this.config.caption_font_shadow_style;
+
+        
         let fnt="" + Math.round(this.config.caption_font_size*this.config.gui_scale)+"pt "+this.config.caption_font;
         dbg_log("Sizes:");
         dbg_log(this.config.caption_font_size);
@@ -565,18 +631,23 @@ class Canvaces{
         dbg_log(this.config.caption_font_size*self.config.gui_scale);
         dbg_log(Math.round(self.config.caption_font_size*self.config.gui_scale));
         dbg_log(fnt);
-        this.ctx_boxes.font = fnt;
-        this.ctx_boxes.shadowColor = "black";
-        this.ctx_boxes.shadowBlur=7;
-        this.ctx_boxes.lineWidth=5;
+
+
+        this.ctx_transcriptions.font = fnt;
+        //this.ctx_transcriptions.shadowColor = "black";
+        this.ctx_transcriptions.shadowColor =  this.config.caption_font_shadow_color;
+        this.ctx_transcriptions.strokeStyle= this.config.caption_font_shadow_color;
+        this.ctx_transcriptions.shadowBlur=7;
+        this.ctx_transcriptions.lineWidth=5;
         //this.ctx_boxes.fillStyle = this.config.transcription_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
-            this.ctx_boxes.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            this.ctx_transcriptions.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }
-        this.ctx_boxes.shadowBlur=0;
-        this.ctx_boxes.fillStyle="white";
+        this.ctx_transcriptions.shadowBlur=0;
+        //this.ctx_transcriptions.fillStyle="white";
+        this.ctx_transcriptions.fillStyle=this.config.caption_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
-            this.ctx_boxes.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            this.ctx_transcriptions.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }        
     }
     set_active(values){
@@ -851,10 +922,22 @@ class Canvaces{
         //this.cnv_boxes.style.background="green";
         this.canvaces_div.appendChild(this.cnv_boxes);
 
+        this.cnv_transcriptions = document.createElement("canvas");
+        this.cnv_transcriptions.innerHTML = "This text is displayed because your browser does not support HTML5 Canvas.";
+        this.cnv_transcriptions.style.position = "absolute";
+        this.cnv_transcriptions.style.zIndex=3;    
+        this.cnv_transcriptions.style.left = 0;
+        this.cnv_transcriptions.style.top = 0;
+        this.cnv_transcriptions.style.height = height;
+        this.cnv_transcriptions.style.width = width;
+        //this.cnv_boxes.style.background="green";
+        this.canvaces_div.appendChild(this.cnv_transcriptions);
+        
+
         this.cnv_active = document.createElement("canvas");
         this.cnv_active.innerHTML = "This text is displayed because your browser does not support HTML5 Canvas.";
         this.cnv_active.style.position = "absolute";
-        this.cnv_active.style.zIndex=3;    
+        this.cnv_active.style.zIndex=4;    
         this.cnv_active.style.left = 0;
         this.cnv_active.style.top = 0;
         this.cnv_active.style.height = height;
@@ -865,7 +948,7 @@ class Canvaces{
         this.cnv_interactive = document.createElement("canvas");
         this.cnv_interactive.innerHTML = "This text is displayed because your browser does not support HTML5 Canvas.";
         this.cnv_interactive.style.position = "absolute";
-        this.cnv_interactive.style.zIndex=4;    
+        this.cnv_interactive.style.zIndex=5;    
         this.cnv_interactive.style.left = 0;
         this.cnv_interactive.style.top = 0;
         this.cnv_interactive.style.height = height;
