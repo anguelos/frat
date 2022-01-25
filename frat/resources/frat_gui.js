@@ -91,7 +91,7 @@ class Canvaces{
         this.transcribe_modal_contents.appendChild(this.transcribe_modal_txt);
         
 
-        dbg_show(["Children#:", this.transcribe_modal.childNodes])
+        //dbg_show(["Children#:", this.transcribe_modal.childNodes])
         this.transcribe_modal.style.display=null;
         //this.transcribe_modal_contents.style.display=null;
         //this.transcribe_modal_contents.style.visibility=0;
@@ -641,13 +641,15 @@ class Canvaces{
         this.ctx_transcriptions.lineWidth=5;
         //this.ctx_boxes.fillStyle = this.config.transcription_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
-            this.ctx_transcriptions.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            // DISABLING TEXT 
+            // this.ctx_transcriptions.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }
         this.ctx_transcriptions.shadowBlur=0;
         //this.ctx_transcriptions.fillStyle="white";
         this.ctx_transcriptions.fillStyle=this.config.caption_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
-            this.ctx_transcriptions.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            // DISABLING TEXT 
+            //this.ctx_transcriptions.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }        
     }
     set_active(values){
@@ -677,24 +679,31 @@ class Canvaces{
         if(this.rect_LTRB.length>0 && this.active.length>0){
             for(let active of this.active){
                 let ltrb=this.rect_LTRB[active];
-
+                
                 this.ctx_active.beginPath();
-                this.ctx_active.lineWidth="8";
-                this.ctx_active.strokeStyle="black";
-                this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                this.ctx_active.stroke();
-
-                this.ctx_active.beginPath();
-                this.ctx_active.lineWidth="4";
+                this.ctx_active.lineWidth="2";
                 this.ctx_active.strokeStyle="white";
                 this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
                 this.ctx_active.stroke();
 
-                this.ctx_active.beginPath();
-                this.ctx_active.lineWidth="2";
-                this.ctx_active.strokeStyle="black";
-                this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                this.ctx_active.stroke();
+
+                // this.ctx_active.beginPath();
+                // this.ctx_active.lineWidth="8";
+                // this.ctx_active.strokeStyle="black";
+                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
+                // this.ctx_active.stroke();
+
+                // this.ctx_active.beginPath();
+                // this.ctx_active.lineWidth="4";
+                // this.ctx_active.strokeStyle="white";
+                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
+                // this.ctx_active.stroke();
+
+                // this.ctx_active.beginPath();
+                // this.ctx_active.lineWidth="2";
+                // this.ctx_active.strokeStyle="black";
+                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
+                // this.ctx_active.stroke();
             }
         }
     }
@@ -869,13 +878,21 @@ class Canvaces{
                 let td_page=document.createElement("td")
                 let a_page=document.createElement("a")
                 a_page.href='/'+page_id+'.html'
-                a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
+                if(page_id==self.page_id){
+                    this.current_page_link=a_page
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid gray" />'
+                }else{
+                    
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid black" />'
+                }
+                function invert(){
+                    document.getElementById("theImage").style.filter="invert(100%)";
+                }
+
                 td_page.appendChild(a_page);
                 tr_nav.appendChild(td_page);
                 self.page_links.push(a_page);
-                if(page_id==self.page_id){
-                    this.current_page_link=a_page
-                }
             }
             tbl_nav.appendChild(tr_nav)
             self.navigation_div.innerHTML='';
