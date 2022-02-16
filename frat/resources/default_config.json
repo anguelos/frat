@@ -1,0 +1,29 @@
+{
+    "caption_font":"Calibri",
+    "caption_font_size":24,
+    "caption_font_shadow_color":"white",
+    "caption_font_color":"black",
+    "all_caption_alpha":0.3,
+    "shortcut_code_next":"n",
+    "shortcut_code_previous":"shift+n",
+    "shortcut_code_delete":"delete",
+    "shortcut_code_edit":"enter",
+    "gui_scale":1,
+    "active_page_border_color":"cyan",
+    "transcription_alpha":0.1,
+    "class_colors":[
+        {"name":"No Class","color":"#000000"},
+        {"name":"Textura","color":"#2f4f4f"},
+        {"name":"Rotunda","color":"#006000"},
+        {"name":"Gotico-Antiqua","color":"#00FF00"},
+        {"name":"Schwabacher","color":"#00008b"},
+        {"name":"Fraktur","color":"#b03060"},
+        {"name":"Bastarda","color":"#ff0000"},
+        {"name":"Antiqua","color":"#ffff00"},
+        {"name":"Italic","color":"#FFD700"},
+        {"name":"Hebrew","color":"#00ffff"},
+        {"name":"Greek","color":"#ff00ff"},
+        {"name":"Manuscript","color":"#a0522d"},
+        {"name":"Ignore","color":"#808080"}
+    ]
+}

@@ -21,11 +21,17 @@ import io
 from PIL import Image
 from cherrypy.lib import file_generator
 from frat import FratWebServer
+import json
 
 
 if __name__ == "__main__":
-    p={"images":[set([]), "the images to be groundtruthed"]}
+    p={"images":[set([]), "the images to be groundtruthed"], "config_json_path":".frat_config.json"}
     p, _ = fargv.fargv(p)
+    if len(p.config_json_path)>0:
+        try:
+            config_dict = json.load(open(p.config_json_path,"r"))
+        except IOError: # using default configuration
+            config_dict = None
     conf = {
         '/': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -35,4 +41,4 @@ if __name__ == "__main__":
         }
     }
     cherrypy.server.socket_host = '0.0.0.0'
-    cherrypy.quickstart(FratWebServer(p.images), '/', conf)
+    cherrypy.quickstart(FratWebServer(p.images,config_dict=config_dict), '/', conf)

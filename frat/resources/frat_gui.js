@@ -14,10 +14,11 @@ function dbg_show(msg){
 
 class Canvaces{
     constructor(id,class_selection,transcribe_modal_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
+        var self = this;
         this.page_id = id;
         this.class_selection_ui = class_selection
         this.class_selection_ui.frat_ui=this;
-        this.config = config;
+        
         this.config={caption_font:"Calibri",
                     caption_font_size:24,
                     caption_font_shadow_color:"white",
@@ -27,14 +28,33 @@ class Canvaces{
                     shortcut_code_previous: "shift+n",
                     shortcut_code_delete: "delete",
                     shortcut_code_edit: "enter",
-                    gui_scale:1.0
+                    gui_scale:1.0,
+                    //active_page_border_color:"#add8e6"
+                    active_page_border_color:"cyan",
+                    class_colors:
+                        [{name:"No Class", color:"#000000"},
+                                  {name:"Textura", color:"#2f4f4f"},
+                                  {name:"Rotunda", color:"#006000"},
+                                  {name:"Gotico-Antiqua", color:"#00FF00"},
+                                  {name:"Schwabacher", color:"#00008b"},
+                                  {name:"Fraktur", color:"#b03060"},
+                                  {name:"Bastarda", color:"#ff0000"},
+                                  {name:"Antiqua", color:"#ffff00"},
+                                  {name:"Italic", color:"##0000FF"},
+                                  {name:"Hebrew", color:"#00ffff"},
+                                  {name:"Greek", color:"#ff00ff"},
+                                  {name:"Manuscript", color:"#a0522d"},
+                                  {name:"Ignore", color:"#808080"}]
                 }
+        this.config = config;
+        //alert("Config:"+this.config);
         var self = this;
         this.active = [];
         //this.set_classes(classes_json);
         //this.set_boxes(gt_json);
         let rect_class_data = JSON.parse(rect_class_data_json);
-        this.set_classes(rect_class_data.classes);
+        //this.set_classes(rect_class_data.classes);
+        this.set_classes(this.config.class_colors);
         this.set_boxes(rect_class_data.rects);
 
         this.commands_div = document.getElementById(commands_divid);
@@ -634,6 +654,7 @@ class Canvaces{
 
 
         this.ctx_transcriptions.font = fnt;
+        this.ctx_transcriptions.globalAlpha = this.config.transcription_alpha;
         //this.ctx_transcriptions.shadowColor = "black";
         this.ctx_transcriptions.shadowColor =  this.config.caption_font_shadow_color;
         this.ctx_transcriptions.strokeStyle= this.config.caption_font_shadow_color;
@@ -642,14 +663,14 @@ class Canvaces{
         //this.ctx_boxes.fillStyle = this.config.transcription_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
             // DISABLING TEXT 
-            // this.ctx_transcriptions.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            this.ctx_transcriptions.strokeText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }
         this.ctx_transcriptions.shadowBlur=0;
         //this.ctx_transcriptions.fillStyle="white";
         this.ctx_transcriptions.fillStyle=this.config.caption_font_color;
         for(var n=0;n<this.rect_LTRB.length;n++){
             // DISABLING TEXT 
-            //this.ctx_transcriptions.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
+            this.ctx_transcriptions.fillText(this.rect_captions[n], this.rect_LTRB[n][0], this.rect_LTRB[n][1]);
         }        
     }
     set_active(values){
@@ -856,7 +877,7 @@ class Canvaces{
         }, false);
     }
     create_config(){
-        this.config_div.innerHTML='<table><tr><td id="user_name">totos</td></tr></table>'
+        this.config_div.innerHTML='<table><tr><td id="user_name"></td></tr></table>'
     }
     create_navigation(){
         this.navigation_div.innerHTML="Navigation Loading";
@@ -880,9 +901,9 @@ class Canvaces{
                 a_page.href='/'+page_id+'.html'
                 if(page_id==self.page_id){
                     this.current_page_link=a_page
-                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid gray" />'
-                }else{
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid '+self.config.active_page_border_color+'" />'
                     
+                }else{
                     a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
                     a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid black" />'
                 }

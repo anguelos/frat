@@ -25,24 +25,22 @@ from cherrypy.lib import file_generator
 frat_gui_js = pkgutil.get_data(__name__, "resources/frat_gui.js").decode("utf-8").encode('utf8')
 frat_webpage_jinja2 = pkgutil.get_data(__name__, "resources/frat_webpage.jinja2").decode("utf-8")
 empty_page_json = pkgutil.get_data(__name__, "resources/empty_page.json").decode("utf-8")
-
+frat_gui_config = json.loads(pkgutil.get_data(__name__, "resources/default_config.json").decode("utf-8"))
 
 def create_thumb(fname, format="png", width=100, height=-1):
     img = Image.open(fname)
-    print("1Thumb size ",img.size)
     if height<0:
         old_width, old_height = img.size
         height = int((old_height/old_width)*width)
     img = img.resize((width, height))
     with io.BytesIO() as output:
-        print("2Thumb size ",img.size)
         img.save(output, format=format)
         return output.getvalue()
 
 
 @cherrypy.expose
 class FratWebServer(object):
-    def __init__(self, image_filenames, image_web_format="png", html_template=None) -> None:
+    def __init__(self, image_filenames, image_web_format="png", html_template=None, config_dict=None) -> None:
         super().__init__()
         if html_template == None:
             self.html_template = jinja2.Template(frat_webpage_jinja2)
@@ -58,6 +56,15 @@ class FratWebServer(object):
             self.image_paths.append(image_filename)
             self.json_paths.append(image_filename+".json")
             self.image_names_to_idx[str(zlib.crc32(self.thumbs[-1]))] = n
+        self.config_dict = {}
+        if config_dict is None:
+            self.config_dict.update(frat_gui_config)
+        else:
+            assert set(config_dict.keys()) == set(frat_gui_config.keys())
+            self.config_dict.update(config_dict)
+
+
+
 
 
     def render_page_image(self, image_id):
@@ -119,15 +126,18 @@ class FratWebServer(object):
                 return self.render_html(page_id)
             else:
                 raise cherrypy.HTTPError(404,"Groundtruth "+repr(page_id)+" not registered")
+        elif url_path == "frat_config.json":
+            cherrypy.response.headers['Content-Type'] = "application/javascript"
+            return str.encode(json.dumps(self.config_dict))
         elif url_path.endswith(".json"):
             if page_id in self.image_names_to_idx:
                 return self.render_gt(page_id)
             else:
                 raise cherrypy.HTTPError(404,"Groundtruth "+repr(page_id)+" not registered")
-        if url_path == "favicon.ico":
+        elif url_path == "favicon.ico":
             cherrypy.response.headers['Content-Type'] = "image/gif"
             return base64.decode("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAO")
-        if url_path == "frat_gui.js":
+        elif url_path == "frat_gui.js":
             cherrypy.response.headers['Content-Type'] = "application/javascript"
             return frat_gui_js
 
