@@ -31,6 +31,7 @@ class Canvaces{
                     gui_scale:1.0,
                     //active_page_border_color:"#add8e6"
                     active_page_border_color:"cyan",
+                    autosave_freq: 0.003,
                     class_colors:
                         [{name:"No Class", color:"#000000"},
                                   {name:"Textura", color:"#2f4f4f"},
@@ -71,10 +72,10 @@ class Canvaces{
         this.img.onload = function(){
             self.initialise_from_image();
             self.cmd_reload();
-            this.update_scales();
+            self.update_scales();
+            self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000/config.autosave_freq))
         }
         this.img.src = img_url;
-        
     }
     open_transcriber(){
         if(this.active.length==1){
@@ -242,6 +243,17 @@ class Canvaces{
         const data = JSON.stringify({"rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
         xhr.send(data);
     }
+    cmd_autosave(){
+        let xhr = new XMLHttpRequest();
+        const url = "/"+this.page_id+".auto.json";
+        ui_warn("Saving to "+url);
+        xhr.open("PUT", url, true);
+        xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+        //xhr.onreadystatechange = function () {}; # Was here from POST example
+        const data = JSON.stringify({"rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
+        xhr.send(data);
+    }
+
 
     cmd_reload(){
         var self=this;
