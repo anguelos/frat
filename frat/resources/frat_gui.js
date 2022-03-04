@@ -13,7 +13,7 @@ function dbg_show(msg){
 
 
 class Canvaces{
-    constructor(id,class_selection,transcribe_modal_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
+    constructor(id,class_selection,transcription_divid,wysiwig_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
         var self = this;
         this.page_id = id;
         this.class_selection_ui = class_selection
@@ -63,7 +63,10 @@ class Canvaces{
         this.selected_div = document.getElementById(selected_divid);
         this.config_div = document.getElementById(config_divid);
         this.navigation_div = document.getElementById(navigation_divid);
-        this.create_transcribe_modal(transcribe_modal_divid);
+        this.wysiwig_div = document.getElementById(wysiwig_divid);
+        this.transcription_div = document.getElementById(transcription_divid);
+
+        //this.create_transcribe_modal(transcribe_modal_divid);
         this.create_canvaces();
         this.create_interactive();
         this.create_commands();
@@ -73,57 +76,12 @@ class Canvaces{
             self.initialise_from_image();
             self.cmd_reload();
             self.update_scales();
-            self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000/config.autosave_freq))
+            self.cmd_show_wysiwyg();
+            self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
         }
         this.img.src = img_url;
     }
-    open_transcriber(){
-        if(this.active.length==1){
-            var active = this.active[0];
-            var self = this;
-            this.transcribe_modal_txt.value=this.rect_captions[active];
-            this.transcribe_modal.style.display=block;
-            this.transcribe_modal_close.onmousedown = function(){
-                alert("clicked");
-                self.rect_captions[active]=this.transcribe_modal_txt.value;
-                self.transcribe_modal.style.display = "none";
-            }
-        }
-    }
-    create_transcribe_modal(transcribe_modal_divid){
-        var self=this;
-        this.transcribe_modal
-        this.transcribe_modal = document.getElementById(transcribe_modal_divid);
-        this.transcribe_modal.innerHTML="";
-        this.transcribe_modal.classList.add('transcribe_modal');
 
-        this.transcribe_modal_contents = document.createElement("div");
-        this.transcribe_modal_contents.classList.add('transcribe_modal_content');
-        this.transcribe_modal.appendChild(this.transcribe_modal_contents);
-
-        this.transcribe_modal_close = document.createElement("span");
-        this.transcribe_modal_close.innerHTML = "&times;";
-        this.transcribe_modal_close.classList.add("close_transcribe_modal");
-        this.transcribe_modal_contents.appendChild(this.transcribe_modal_close);
-        
-        this.transcribe_modal_txt = document.createElement("input");
-        this.transcribe_modal_txt.setAttribute("type", "text");
-        this.transcribe_modal_txt.setAttribute("value", "THIS should never be seen!");
-        this.transcribe_modal_contents.appendChild(this.transcribe_modal_txt);
-        
-
-        //dbg_show(["Children#:", this.transcribe_modal.childNodes])
-        this.transcribe_modal.style.display=null;
-        //this.transcribe_modal_contents.style.display=null;
-        //this.transcribe_modal_contents.style.visibility=0;
-
-        //window.onclick = function(e){
-        //    if(e.target == modal){
-        //        modal.style.display = "none"
-        //    }
-        //}
-
-    }
     update_scales(){
         this.detected_scale = window.innerWidth/window.outerWidth;
         //this.detected_scale = window.outerWidth/window.innerWidth;
@@ -291,6 +249,60 @@ class Canvaces{
         this.config.gui_scale=1.0;
         this.update_scales();
     }
+    cmd_show_wysiwyg(){
+        if("transcription_interval" in this){
+            clearInterval(this.transcription_interval);
+        }
+        this.wysiwig_div.style.display = "inline";
+        this.transcription_div.style.display = "none";
+        this.wysiwig = true;
+        this.draw_boxes();
+    }
+    cmd_show_transcriptions(){
+        let fnt="" + Math.round(this.config.transcription_font_size*this.config.gui_scale)+"pt "+this.config.transcription_font;
+        let tbl=document.createElement("table");
+        var transcription_textboxes = [];
+        for(let n=0;n<this.rect_captions.length;n++){
+            const l=this.rect_LTRB[n][0];
+            const t=this.rect_LTRB[n][1];
+            const r=this.rect_LTRB[n][2];
+            const b=this.rect_LTRB[n][3];            
+            let img_tr = document.createElement("tr");
+            let img_td = document.createElement("td");
+            let cnv = document.createElement("canvas");
+            cnv.width = 1+(r-l);
+            cnv.height = 1+(b-t);
+            let ctx = cnv.getContext("2d");
+            ctx.drawImage(this.img, l, t, 1+(r-l), 1+(b-t), 0, 0, 1+(r-l), 1+(b-t));
+            img_td.appendChild(cnv);
+            img_tr.appendChild(img_td);
+            tbl.appendChild(img_tr)
+            let tr = document.createElement("tr");
+            let td = document.createElement("td");
+            let textbox = document.createElement("input");
+            textbox.setAttribute("type", "text");
+            textbox.setAttribute("value", this.rect_captions[n]);
+            textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
+            textbox.style.fontFamily = this.config.transcription_font;
+            transcription_textboxes.push(textbox);
+            td.appendChild(textbox);
+            tr.appendChild(td);
+            tbl.appendChild(tr);
+        }
+        this.transcription_div.innerHTML="";        
+        this.transcription_div.appendChild(tbl);
+        
+        this.transcription_div.style.display = "inline";
+        this.wysiwig_div.style.display = "none";
+        this.wysiwig = false;
+        var self=this;
+        function update_transcriptions(){
+            for(let n=0;n<self.rect_LTRB.length;n++){
+                self.rect_captions[n]=transcription_textboxes[n].value;
+            }
+        }
+        this.transcription_interval = setInterval(update_transcriptions, 500);
+    }
     create_commands(){
         var self = this;
         this.commands_div.innerHTML="";
@@ -380,6 +392,21 @@ class Canvaces{
         btn_zoomout.onclick=function(){self.cmd_zoomout();}
         td_zoomout.appendChild(btn_zoomout);
         row.appendChild(td_zoomout);
+
+
+        let td_wysiwyg = document.createElement("td");
+        let btn_wysiwyg = document.createElement("button");
+        btn_wysiwyg.innerText = "Show WYSIWYG";
+        btn_wysiwyg.onclick=function(){self.cmd_show_wysiwyg();}
+        td_wysiwyg.appendChild(btn_wysiwyg);
+        row.appendChild(td_wysiwyg);
+
+        let td_trascribe = document.createElement("td");
+        let btn_trascribe = document.createElement("button");
+        btn_trascribe.innerText = "Show Transcriber";
+        btn_trascribe.onclick=function(){self.cmd_show_transcriptions();}
+        td_trascribe.appendChild(btn_trascribe);
+        row.appendChild(td_trascribe);
 
         this.commands_div.appendChild(row);
     }

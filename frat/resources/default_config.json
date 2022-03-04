@@ -1,4 +1,6 @@
 {
+    "transcription_font":"Helvetica",
+    "transcription_font_size":50,
     "caption_font":"Calibri",
     "caption_font_size":24,
     "caption_font_shadow_color":"white",
@@ -10,8 +12,8 @@
     "shortcut_code_edit":"enter",
     "gui_scale":1,
     "active_page_border_color":"deeppink",
-    "transcription_alpha":0.1,
-    "autosave_freq": 30.0,
+    "transcription_alpha":0.7,
+    "autosave_freq": 0.03,
     "class_colors":[
         {"name":"No Class","color":"#000000"},
         {"name":"Textura","color":"#2f4f4f"},

@@ -57,18 +57,7 @@
    display: inline-block;
    float: top;
 }
-#active {
-   width:15%; /* or whatever width you want. */
-   height:80%; /* or whatever width you want. */
-   max-width:15%; /* or whatever width you want. */
-   display: inline-block;
-   float: left;
-   position:absolute;
-   left:80%;
-   top:20%;
-   width:20%;
 
-}
 #navigation{
     left:0px;
     top:0px;
@@ -77,6 +66,7 @@
     overflow: scroll;
     position:absolute;
 }
+
 #class_selector{
     left:0px;
     top:10%;
@@ -94,7 +84,20 @@
     overflow: hide;
     position:absolute;
 }
+/*
+#active {
+   width:15%; /* or whatever width you want. */
+   height:80%; /* or whatever width you want. */
+   max-width:15%; /* or whatever width you want. */
+   display: inline-block;
+   float: left;
+   position:absolute;
+   left:80%;
+   top:20%;
+   width:20%;
+}*/
 
+/*
 #canvaces{
     left:0px;
     top:20%;
@@ -103,6 +106,46 @@
     overflow: scroll;
     position:absolute;
 }
+*/
+
+
+#canvaces{
+    left:0px;
+    top:0px;
+    display:block;
+    width:80%;
+    height:100%;
+    overflow: scroll;
+    position:absolute;
+}
+
+#active {
+   top: 20%;
+   height: 80%;
+   display: block;
+   position:absolute;
+   overflow: scroll;
+   left:80%;
+   width:20%;
+}
+
+#transcriptions{
+    left:0px;
+    top:20%;
+    width:80%;
+    height: 80%;
+    overflow: scroll;
+    position:absolute;
+}
+#wysiwyg{
+    left:0px;
+    top:20%;
+    width:80%;
+    height: 80%;
+    overflow: scroll;
+    position:absolute;
+}
+
 
        </style>
 <meta charset="UTF-8" />
@@ -157,7 +200,7 @@
             classesUI.write_gui(http_config["class_colors"]);
             //classesUI.write_gui(class_label_values);
             //canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
-            canvaces = new Canvaces("{{id}}",classesUI,"transcribe_modal","config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),http_config);
+            canvaces = new Canvaces("{{id}}",classesUI,"transcriptions","wysiwyg","config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),http_config);
         }
     </script>
 
@@ -177,12 +220,16 @@
 <div id="class_selector">
     Class selector
 </div>
-<div>
+
     <table><tr>
         <td>
-            <div id="canvaces" >
-
-                Canvaces
+            <div id="wysiwyg">
+                <div id="canvaces" >
+                    Canvaces
+                </div>
+            </div>
+            <div id="transcriptions">
+                TRANSCRIPTIONS
             </div>
         </td>
         <td>
@@ -195,12 +242,7 @@
 <div id="command_buttons">
     commands
 </div>
-<div id="transcribe_modal" class="modal">
-    <div class="transcribe_modal_content">
-        <span class="close">&times;</span>
-        <p>Some text in the Modal..</p>
-    </div>
-</div>
+
 
 </body>
 </html>
