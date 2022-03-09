@@ -72,11 +72,24 @@ class Canvaces{
         this.create_commands();
         this.create_config();
         this.create_navigation();
+
         this.img.onload = function(){
             self.initialise_from_image();
             self.cmd_reload();
             self.update_scales();
             self.cmd_show_wysiwyg();
+            window.onbeforeunload = function () {
+                self.cmd_save();
+                return "Are you sure to leave this page?Are ya?";
+            };            
+            //window.onunload = function(){alert("unloading");self.cmd_save()};
+            //window.addEventListener('beforeunload', function (e) {
+                // Cancel the event
+                //e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+                //alert("unloading");self.cmd_save()
+                // Chrome requires returnValue to be set
+                //e.returnValue = '';
+              //});
             self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
         }
         this.img.src = img_url;
@@ -284,6 +297,7 @@ class Canvaces{
             textbox.setAttribute("value", this.rect_captions[n]);
             textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
             textbox.style.fontFamily = this.config.transcription_font;
+            textbox.style.width = "100%";
             transcription_textboxes.push(textbox);
             td.appendChild(textbox);
             tr.appendChild(td);

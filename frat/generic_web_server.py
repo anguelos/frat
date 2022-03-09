@@ -18,7 +18,9 @@ import sys
 import os
 import io
 from PIL import Image
+import cv2
 from cherrypy.lib import file_generator
+import numpy as np
 
 #grouting_js = pkgutil.get_data(__name__, "resources/grouting.js").decode("utf-8")
 #grouting_jinja2 = pkgutil.get_data(__name__, "resources/grouting_webpage.jinja2").decode("utf-8")
@@ -28,15 +30,27 @@ frat_webpage_jinja2 = pkgutil.get_data(__name__, "resources/frat_webpage.jinja2"
 empty_page_json = pkgutil.get_data(__name__, "resources/empty_page.json").decode("utf-8")
 frat_gui_config = json.loads(pkgutil.get_data(__name__, "resources/default_config.json").decode("utf-8"))
 
+def pillow_to_bytes(img, extention):
+    img = np.array(img)
+    if(len(img.shape)==3):
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    status, res = cv2.imencode(f".{extention.lower()}", img)
+    if status:
+        return res.tobytes()
+    else:
+        raise ValueError
+
+
 def create_thumb(fname, format="png", width=100, height=-1):
     img = Image.open(fname)
     if height<0:
         old_width, old_height = img.size
         height = int((old_height/old_width)*width)
     img = img.resize((width, height))
-    with io.BytesIO() as output:
-        img.save(output, format=format)
-        return output.getvalue()
+    return pillow_to_bytes(img, format)
+    #with io.BytesIO() as output:
+    #    img.save(output, format=format)
+    #    return output.getvalue()
 
 
 @cherrypy.expose
@@ -71,9 +85,29 @@ class FratWebServer(object):
         img_path = self.image_paths[self.image_names_to_idx[image_id]]
         img = Image.open(img_path)
         cherrypy.response.headers['Content-Type'] = f"image/{self.image_web_format}"
-        with io.BytesIO() as output:
-            img.save(output, format=self.image_web_format)
-            return output.getvalue()
+        return pillow_to_bytes(img, self.image_web_format)
+        # TODO (anguelos) use constructs like the following to confirm Pillow is so much slower than opencv
+        # status, res = cv2.imencode(f".{self.image_web_format.lower()}", np.array(img))
+        # if status:
+        #     return res.tobytes()
+        # with io.BytesIO() as output:
+        #     import time
+        #     import numpy as np
+        #     t=time.time()
+        #     img.save(output, format=self.image_web_format)
+        #     print(f"\n\nsave1 {self.image_web_format}: {time.time()-t}")
+        #     t=time.time()
+        #     img.save(open("/tmp/1.png","wb"), format=self.image_web_format)
+        #     print(f"save2: {time.time()-t}")
+        #     t=time.time()
+        #     arr = np.array(img)
+        #     print(f"save4: {time.time()-t}")
+        #     t=time.time()
+        #     status, res = cv2.imencode(f".{self.image_web_format.lower()}", arr)
+        #     res = res.tobytes()
+        #     print(f"save5: {time.time()-t}")
+        #     #return output.getvalue()
+        #     return res
     
     def render_thumb(self, image_id):
         cherrypy.response.headers['Content-Type'] = f"image/{self.image_web_format}"
@@ -107,7 +141,7 @@ class FratWebServer(object):
 
     @cherrypy.popargs('url_path')
     def GET(self, url_path=""):
-        print("GETTING:",repr(url_path))
+        #print("GETTING:",repr(url_path))
         page_id = url_path.split("/")[-1].split(".")[0]
         if page_id == "page_id_list":
             return self.render_idlist()
@@ -153,7 +187,7 @@ class FratWebServer(object):
         page_id = id_split[0]
         annotation_path = self.json_paths[self.image_names_to_idx[id_split[0]]]
         auto_annotation_path = self.autojson_paths[self.image_names_to_idx[id_split[0]]]
-        print("PUT:" + repr(page_id))
+        #print("PUT:" + repr(page_id))
         cl = cherrypy.request.headers['Content-Length']
         json_string = str(cherrypy.request.body.read(int(cl)),'utf-8')
         if len(id_split) == 2 and id_split[1].lower()=="json": # normal annotation

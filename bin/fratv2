@@ -33,7 +33,9 @@ if __name__ == "__main__":
         except IOError: # using default configuration
             config_dict = None
     conf = {
+        
         '/': {
+            'log.screen': False,
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True,
             'tools.response_headers.on': True,
