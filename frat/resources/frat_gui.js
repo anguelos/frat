@@ -80,7 +80,7 @@ class Canvaces{
             self.cmd_show_wysiwyg();
             window.onbeforeunload = function () {
                 self.cmd_save();
-                return "Are you sure to leave this page?Are ya?";
+                //return "Are you sure to leave this page?Are ya?";
             };            
             self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
         }
@@ -239,19 +239,6 @@ class Canvaces{
         };
         xhr.send();
     }
-    cmd_zoomin(){
-        this.config.gui_scale = Math.min(this.config.gui_scale*1.2, 4.0);
-        this.update_scales();
-        //this.canvaces_div.style.zoom=Math.min(this.canvaces_div.style.zoom*1.2, 4.0);
-    }
-    cmd_zoomout(){
-        this.config.gui_scale = Math.max(this.config.gui_scale*.8, .2);
-        this.update_scales();
-    }
-    cmd_zoomreset(){
-        this.config.gui_scale=1.0;
-        this.update_scales();
-    }
     cmd_show_wysiwyg(){
         if("transcription_interval" in this){
             clearInterval(this.transcription_interval);
@@ -275,10 +262,10 @@ class Canvaces{
             let type_td = document.createElement("td");
             let type_textbox = document.createElement("input");
             type_textbox.setAttribute("type", "text");
-            type_textbox.setAttribute("value", this.rect_classes[n]);
-            textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
-            textbox.style.fontFamily = this.config.transcription_font;
-            textbox.readOnly = true;
+            type_textbox.setAttribute("value", this.class_names[this.rect_classes[n]]);
+            type_textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
+            type_textbox.style.fontFamily = this.config.transcription_font;
+            type_textbox.readOnly = true;
             type_td.appendChild(type_textbox);
             type_tr.appendChild(type_td);
             tbl.appendChild(type_tr);
@@ -305,6 +292,9 @@ class Canvaces{
             td.appendChild(textbox);
             tr.appendChild(td);
             tbl.appendChild(tr);
+            let empty_tr = document.createElement("tr")
+            empty_tr.innerHTML="<td></td>"
+            tbl.appendChild(empty_tr)
         }
         this.transcription_div.innerHTML="";        
         this.transcription_div.appendChild(tbl);
@@ -319,6 +309,19 @@ class Canvaces{
             }
         }
         this.transcription_interval = setInterval(update_transcriptions, 500);
+    }
+    cmd_zoomin(){
+        this.config.gui_scale = Math.min(this.config.gui_scale*1.2, 4.0);
+        this.update_scales();
+        //this.canvaces_div.style.zoom=Math.min(this.canvaces_div.style.zoom*1.2, 4.0);
+    }
+    cmd_zoomout(){
+        this.config.gui_scale = Math.max(this.config.gui_scale*.8, .2);
+        this.update_scales();
+    }
+    cmd_zoomreset(){
+        this.config.gui_scale=1.0;
+        this.update_scales();
     }
     create_commands(){
         var self = this;
@@ -389,6 +392,20 @@ class Canvaces{
         td_reload.appendChild(btn_reload);
         row.appendChild(td_reload);
 
+        let td_wysiwyg = document.createElement("td");
+        let btn_wysiwyg = document.createElement("button");
+        btn_wysiwyg.innerText = "Label Boxes";
+        btn_wysiwyg.onclick=function(){self.cmd_show_wysiwyg();}
+        td_wysiwyg.appendChild(btn_wysiwyg);
+        row.appendChild(td_wysiwyg);
+
+        let td_trascribe = document.createElement("td");
+        let btn_trascribe = document.createElement("button");
+        btn_trascribe.innerText = "Transcribe Boxes";
+        btn_trascribe.onclick=function(){self.cmd_show_transcriptions();}
+        td_trascribe.appendChild(btn_trascribe);
+        row.appendChild(td_trascribe);        
+
         let td_zoomin = document.createElement("td");
         let btn_zoomin = document.createElement("button");
         btn_zoomin.innerText = "Zoom In";
@@ -409,21 +426,6 @@ class Canvaces{
         btn_zoomout.onclick=function(){self.cmd_zoomout();}
         td_zoomout.appendChild(btn_zoomout);
         row.appendChild(td_zoomout);
-
-
-        let td_wysiwyg = document.createElement("td");
-        let btn_wysiwyg = document.createElement("button");
-        btn_wysiwyg.innerText = "Show WYSIWYG";
-        btn_wysiwyg.onclick=function(){self.cmd_show_wysiwyg();}
-        td_wysiwyg.appendChild(btn_wysiwyg);
-        row.appendChild(td_wysiwyg);
-
-        let td_trascribe = document.createElement("td");
-        let btn_trascribe = document.createElement("button");
-        btn_trascribe.innerText = "Show Transcriber";
-        btn_trascribe.onclick=function(){self.cmd_show_transcriptions();}
-        td_trascribe.appendChild(btn_trascribe);
-        row.appendChild(td_trascribe);
 
         this.commands_div.appendChild(row);
     }

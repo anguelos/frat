@@ -77,6 +77,13 @@ class FratWebServer(object):
         if config_dict is None:
             self.config_dict.update(frat_gui_config)
         else:
+            print(config_dict.keys())
+            print()
+            print(frat_gui_config.keys())
+            print()
+            print(set(config_dict.keys())-set(frat_gui_config))
+            print()
+            print(set(frat_gui_config)-set(config_dict.keys()))
             assert set(config_dict.keys()) == set(frat_gui_config.keys())
             self.config_dict.update(config_dict)
 
