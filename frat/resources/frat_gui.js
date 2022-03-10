@@ -82,14 +82,6 @@ class Canvaces{
                 self.cmd_save();
                 return "Are you sure to leave this page?Are ya?";
             };            
-            //window.onunload = function(){alert("unloading");self.cmd_save()};
-            //window.addEventListener('beforeunload', function (e) {
-                // Cancel the event
-                //e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-                //alert("unloading");self.cmd_save()
-                // Chrome requires returnValue to be set
-                //e.returnValue = '';
-              //});
             self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
         }
         this.img.src = img_url;
@@ -202,7 +194,6 @@ class Canvaces{
     }
     cmd_help_config(){
         ui_error("cmd_help_config: help TODO");
-
     }
     cmd_save(){
         let xhr = new XMLHttpRequest();
@@ -224,7 +215,6 @@ class Canvaces{
         const data = JSON.stringify({"rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
         xhr.send(data);
     }
-
 
     cmd_reload(){
         var self=this;
@@ -279,7 +269,20 @@ class Canvaces{
             const l=this.rect_LTRB[n][0];
             const t=this.rect_LTRB[n][1];
             const r=this.rect_LTRB[n][2];
-            const b=this.rect_LTRB[n][3];            
+            const b=this.rect_LTRB[n][3];
+            
+            let type_tr = document.createElement("tr");
+            let type_td = document.createElement("td");
+            let type_textbox = document.createElement("input");
+            type_textbox.setAttribute("type", "text");
+            type_textbox.setAttribute("value", this.rect_classes[n]);
+            textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
+            textbox.style.fontFamily = this.config.transcription_font;
+            textbox.readOnly = true;
+            type_td.appendChild(type_textbox);
+            type_tr.appendChild(type_td);
+            tbl.appendChild(type_tr);
+
             let img_tr = document.createElement("tr");
             let img_td = document.createElement("td");
             let cnv = document.createElement("canvas");

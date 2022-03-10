@@ -13,7 +13,7 @@ setup(
     packages=['frat'],
     package_data={'frat': ['resources/*.js', 'resources/*.json', 'resources/*.jinja2']},
     include_package_data=True,
-    scripts=['bin/fratv2'],
+    scripts=['bin/frat', 'bin/frat_config'],
     license='GPLv3',
     author='Anguelos Nicolaou',
     author_email='anguelos.nicolaou@gmail.com',
@@ -29,5 +29,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering"],
-    install_requires=["Pillow", "jinja2", "cherrypy", "fargv", "tqdm", "opencv-python-headless"],
+    install_requires=["Pillow", "jinja2", "cherrypy", "fargv", "tqdm", "opencv-python-headless", "numpy", "opencv-python-headless"],
 )

@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+
+import sys
+import fargv
+import frat
+import json
+import os
+import getpass
+
+def validate_config(config):
+    assert set(config.keys())==set(frat.frat_gui_config.keys())
+
+
+if __name__ == "__main__":
+    p={
+        "config_json_path":".frat_config.json",
+        "cmd":("create","list_keys","set","get", "print"),
+        "indent": 2,
+        "username":"auto",
+        "key": "transcription_font",
+        "value": "Helvetica",
+    }
+    p, _ = fargv.fargv(p)
+    try:
+        config = json.load(open(p.config_json_path, "r"))
+    except IOError:
+        print(f"Could not load config from {p.config_json_path}, using default", file=sys.stderr)
+        config = {k:v for k, v in frat.frat_gui_config.items()}
+        if p.username == "auto":
+            config["user"] = getpass.getuser()
+        else:
+            config["user"] = p.username
+    if p.cmd == "create":
+        if not os.path.exists(p.config_json_path):
+            open(p.config_json_path,"w").write(json.dumps(config, indent=p.indent))
+        else:
+            print(f"{p.config_json_path} exists, can't overwrite", file=sys.stderr)
+    elif p.cmd == "set":
+        config[p.key] = type(config[p.key])(p.value)
+        open(p.config_json_path).write(json.dumps(config, indent=p.indent))
+    elif p.cmd == "get":
+        print("p.key: ", config[p.key])
+    elif p.cmd == "list_keys":
+        print(" ".join(config.keys()))
+    elif p.cmd == "print":
+        print(json.dumps(config, indent=p.indent))
+    else:
+        raise ValueError
