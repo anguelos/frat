@@ -12,7 +12,7 @@
     "shortcut_code_previous":"shift+n",
     "shortcut_code_delete":"delete",
     "shortcut_code_edit":"enter",
-    "gui_scale":1,
+    "gui_scale":1.0,
     "active_page_border_color":"deeppink",
     "transcription_alpha":0.7,
     "autosave_freq": 0.03,

@@ -153,39 +153,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="/frat_gui.js"></script>
     <script>
-        var class_label_values = [{name:"No Class", color:"#000000"},
-                                  {name:"Textura", color:"#2f4f4f"},
-                                  {name:"Rotunda", color:"#008000"},
-                                  {name:"Gotico-Antiqua", color:"#00FF00"},
-                                  {name:"Schwabacher", color:"#00008b"},
-                                  {name:"Fraktur", color:"#b03060"},
-                                  {name:"Bastarda", color:"#ff0000"},
-                                  {name:"Antiqua", color:"#ffff00"},
-                                  {name:"Italic", color:"#00ff00"},
-                                  {name:"Hebrew", color:"#00ffff"},
-                                  {name:"Greek", color:"#ff00ff"},
-                                  {name:"Manuscript", color:"#a0522d"},
-                                  {name:"Ignore", color:"#808080"}];
-        var boxes = [{ltrb:[100, 50, 400, 100], transcription:"a text block", class_id:0},
-                  {ltrb:[100, 50, 400, 100], transcription:"a text block", class_id:1},
-                  {ltrb:[100, 150, 450, 200], transcription:"another text block", class_id:2},
-                  {ltrb:[200, 250, 450, 300], transcription:"another text block", class_id:3},
-                  {ltrb:[200, 350, 450, 400], transcription:"another text block", class_id:4},
-                  {ltrb:[200, 450, 450, 500], transcription:"another text block", class_id:5},
-                  {ltrb:[200, 550, 450, 600], transcription:"another text block", class_id:6},
-                  {ltrb:[200, 650, 450, 700], transcription:"another text block", class_id:7},
-                  {ltrb:[200, 750, 450, 800], transcription:"another text block", class_id:8},
-                  {ltrb:[200, 850, 450, 900], transcription:"another text block", class_id:9},
-                  {ltrb:[200, 950, 450, 1000], transcription:"another text block", class_id:10},
-                  {ltrb:[200, 1050, 450, 1100], transcription:"another text block", class_id:11},
-                  {ltrb:[200, 1150, 450, 1200], transcription:"another text block", class_id:12},
-                  ];
-        var boxes_and_labels={rects:boxes, classes:class_label_values};
-        var config={caption_font:"18pt Calibri",
-                    shortcut_code_next: "tab",
-                    shortcut_code_previous: "shift+tab",
-                    shortcut_code_delete: "delete"
-        };
         var classesUI = null;
 
         var http_config={};
@@ -198,9 +165,7 @@
         function page_load(){
             classesUI = new ClassIdEditor(http_config["class_colors"], "class_editor", "class_selector");
             classesUI.write_gui(http_config["class_colors"]);
-            //classesUI.write_gui(class_label_values);
-            //canvaces = new Canvaces(classesUI,"canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes),JSON.stringify(class_label_values),config);
-            canvaces = new Canvaces("{{id}}",classesUI,"transcriptions","wysiwyg","config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png",JSON.stringify(boxes_and_labels),http_config);
+            canvaces = new Canvaces("{{id}}",classesUI,"transcriptions","wysiwyg","config_editor","navigation","canvaces","command_buttons", "active","{{id}}.png", http_config);
         }
     </script>
 

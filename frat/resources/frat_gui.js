@@ -13,7 +13,8 @@ function dbg_show(msg){
 
 
 class Canvaces{
-    constructor(id,class_selection,transcription_divid,wysiwig_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, rect_class_data_json,config){
+    constructor(id,class_selection,transcription_divid,
+        wysiwig_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, config){
         var self = this;
         this.page_id = id;
         this.class_selection_ui = class_selection
@@ -25,7 +26,7 @@ class Canvaces{
         this.active = [];
         //this.set_classes(classes_json);
         this.set_boxes([]);
-        let rect_class_data = JSON.parse(rect_class_data_json);
+        //let rect_class_data = JSON.parse(rect_class_data_json);
         //this.set_classes(rect_class_data.classes);
         this.set_classes(this.config.class_colors);
         //this.set_boxes(rect_class_data.rects);
@@ -591,8 +592,8 @@ class Canvaces{
         dbg_log("Sizes:");
         dbg_log(this.config.caption_font_size);
         dbg_log(this.config.gui_scale);
-        dbg_log(this.config.caption_font_size*self.config.gui_scale);
-        dbg_log(Math.round(self.config.caption_font_size*self.config.gui_scale));
+        dbg_log(this.config.transcription_font_size*this.config.gui_scale);
+        dbg_log(Math.round(this.config.transcription_font_size*this.config.gui_scale));
         dbg_log(fnt);
 
 
