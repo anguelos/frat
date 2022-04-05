@@ -24,11 +24,11 @@ class Canvaces{
         var self = this;
         this.active = [];
         //this.set_classes(classes_json);
-        //this.set_boxes(gt_json);
+        this.set_boxes([]);
         let rect_class_data = JSON.parse(rect_class_data_json);
         //this.set_classes(rect_class_data.classes);
         this.set_classes(this.config.class_colors);
-        this.set_boxes(rect_class_data.rects);
+        //this.set_boxes(rect_class_data.rects);
 
         this.commands_div = document.getElementById(commands_divid);
         this.canvaces_div = document.getElementById(canvaces_divid);
