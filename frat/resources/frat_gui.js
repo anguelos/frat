@@ -19,34 +19,6 @@ class Canvaces{
         this.class_selection_ui = class_selection
         this.class_selection_ui.frat_ui=this;
         
-        this.config={caption_font:"Calibri",
-                    caption_font_size:24,
-                    caption_font_shadow_color:"white",
-                    caption_font_color:"black",
-                    all_caption_alpha:0.3,
-                    shortcut_code_next: "n",
-                    shortcut_code_previous: "shift+n",
-                    shortcut_code_delete: "delete",
-                    shortcut_code_edit: "enter",
-                    gui_scale:1.0,
-                    //active_page_border_color:"#add8e6"
-                    active_page_border_color:"cyan",
-                    autosave_freq: 0.003,
-                    class_colors:
-                        [{name:"No Class", color:"#000000"},
-                                  {name:"Textura", color:"#2f4f4f"},
-                                  {name:"Rotunda", color:"#006000"},
-                                  {name:"Gotico-Antiqua", color:"#00FF00"},
-                                  {name:"Schwabacher", color:"#00008b"},
-                                  {name:"Fraktur", color:"#b03060"},
-                                  {name:"Bastarda", color:"#ff0000"},
-                                  {name:"Antiqua", color:"#ffff00"},
-                                  {name:"Italic", color:"##0000FF"},
-                                  {name:"Hebrew", color:"#00ffff"},
-                                  {name:"Greek", color:"#ff00ff"},
-                                  {name:"Manuscript", color:"#a0522d"},
-                                  {name:"Ignore", color:"#808080"}]
-                }
         this.config = config;
         //alert("Config:"+this.config);
         var self = this;
@@ -239,6 +211,7 @@ class Canvaces{
         };
         xhr.send();
     }
+
     cmd_show_wysiwyg(){
         if("transcription_interval" in this){
             clearInterval(this.transcription_interval);
@@ -249,6 +222,7 @@ class Canvaces{
         this.draw_boxes();
     }
     cmd_show_transcriptions(){
+        this.wysiwig = false;
         let fnt="" + Math.round(this.config.transcription_font_size*this.config.gui_scale)+"pt "+this.config.transcription_font;
         let tbl=document.createElement("table");
         var transcription_textboxes = [];
@@ -259,15 +233,17 @@ class Canvaces{
             const b=this.rect_LTRB[n][3];
             
             let type_tr = document.createElement("tr");
-            let type_td = document.createElement("td");
-            let type_textbox = document.createElement("input");
-            type_textbox.setAttribute("type", "text");
-            type_textbox.setAttribute("value", this.class_names[this.rect_classes[n]]);
-            type_textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
-            type_textbox.style.fontFamily = this.config.transcription_font;
-            type_textbox.readOnly = true;
-            type_td.appendChild(type_textbox);
-            type_tr.appendChild(type_td);
+            //let type_td = document.createElement("td");
+            type_tr.innerHTML = '<td style="text-shadow: 0 0 8px '+this.class_colors[this.rect_classes[n]]+'; font-size: '+this.config.transcription_font_size+'px ;">'+this.class_names[this.rect_classes[n]]+'</td>';
+            //type_td.style = "2px 2px 4px "+this.class_colors[this.rect_classes[n]]+";"
+            //let type_textbox = document.createElement("input");
+            //type_textbox.setAttribute("type", "text");
+            //type_textbox.setAttribute("value", this.class_names[this.rect_classes[n]]);
+            //type_textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
+            //type_textbox.style.fontFamily = this.config.transcription_font;
+            //type_textbox.readOnly = true;
+            //type_td.appendChild(type_textbox);
+            //type_tr.appendChild(type_td);
             tbl.appendChild(type_tr);
 
             let img_tr = document.createElement("tr");
@@ -293,7 +269,7 @@ class Canvaces{
             tr.appendChild(td);
             tbl.appendChild(tr);
             let empty_tr = document.createElement("tr")
-            empty_tr.innerHTML="<td></td>"
+            empty_tr.innerHTML='<td style="border-bottom: '+this.config.transcription_gap+'px solid transparent;"></td>';
             tbl.appendChild(empty_tr)
         }
         this.transcription_div.innerHTML="";        
@@ -328,105 +304,14 @@ class Canvaces{
         this.commands_div.innerHTML="";
         let table = document.createElement("table");
         let row = document.createElement("tr");
-        
-        let td_next = document.createElement("td");
-        let btn_next = document.createElement("button");
-        btn_next.innerText = "Next";
-        btn_next.onclick=function(){self.cmd_select_next();}
-        td_next.appendChild(btn_next);
-        row.appendChild(td_next);
-
-        let td_prev = document.createElement("td");
-        let btn_prev = document.createElement("button");
-        btn_prev.innerText = "Previous";
-        btn_prev.onclick=function(){self.cmd_select_prev();}
-        td_prev.appendChild(btn_prev);
-        row.appendChild(td_prev);
-
-        let td_edit = document.createElement("td");
-        let btn_edit = document.createElement("button");
-        btn_edit.innerText = "Edit";
-        btn_edit.onclick=function(){self.cmd_edit_caption();}
-        td_edit.appendChild(btn_edit);
-        row.appendChild(td_edit);
-
-        let td_del = document.createElement("td");
-        let btn_del = document.createElement("button");
-        btn_del.innerText = "Delete";
-        btn_del.onclick=function(){self.cmd_delete_selected();}
-        td_del.appendChild(btn_del);
-        row.appendChild(td_del);
-
-        let td_undel = document.createElement("td");
-        let btn_undel = document.createElement("button");
-        btn_undel.innerText = "Undelete";
-        btn_undel.onclick=function(){self.cmd_undelete();}
-        td_undel.appendChild(btn_undel);
-        row.appendChild(td_undel);
-
-        let td_merge = document.createElement("td");
-        let btn_merge = document.createElement("button");
-        btn_merge.innerText = "Merge";
-        btn_merge.onclick=function(){self.cmd_merge_selected();}
-        td_merge.appendChild(btn_merge);
-        row.appendChild(td_merge);
-
-        let td_help = document.createElement("td");
-        let btn_help = document.createElement("button");
-        btn_help.innerText = "Help";
-        btn_help.onclick=function(){self.cmd_help_config();}
-        td_help.appendChild(btn_help);
-        row.appendChild(td_help);
-
-        let td_save = document.createElement("td");
-        let btn_save = document.createElement("button");
-        btn_save.innerText = "Save";
-        btn_save.onclick=function(){self.cmd_save();}
-        td_save.appendChild(btn_save);
-        row.appendChild(td_save);
-
-        let td_reload = document.createElement("td");
-        let btn_reload = document.createElement("button");
-        btn_reload.innerText = "Reload";
-        btn_reload.onclick=function(){self.cmd_reload();}
-        td_reload.appendChild(btn_reload);
-        row.appendChild(td_reload);
-
-        let td_wysiwyg = document.createElement("td");
-        let btn_wysiwyg = document.createElement("button");
-        btn_wysiwyg.innerText = "Label Boxes";
-        btn_wysiwyg.onclick=function(){self.cmd_show_wysiwyg();}
-        td_wysiwyg.appendChild(btn_wysiwyg);
-        row.appendChild(td_wysiwyg);
-
-        let td_trascribe = document.createElement("td");
-        let btn_trascribe = document.createElement("button");
-        btn_trascribe.innerText = "Transcribe Boxes";
-        btn_trascribe.onclick=function(){self.cmd_show_transcriptions();}
-        td_trascribe.appendChild(btn_trascribe);
-        row.appendChild(td_trascribe);        
-
-        let td_zoomin = document.createElement("td");
-        let btn_zoomin = document.createElement("button");
-        btn_zoomin.innerText = "Zoom In";
-        btn_zoomin.onclick=function(){self.cmd_zoomin();}
-        td_reload.appendChild(btn_zoomin);
-        row.appendChild(td_zoomin);
-
-        let td_zoomreset = document.createElement("td");
-        let btn_zoomreset = document.createElement("button");
-        btn_zoomreset.innerText = "Zoom 100%";
-        btn_zoomreset.onclick=function(){self.cmd_zoomreset();}
-        td_zoomreset.appendChild(btn_zoomreset);
-        row.appendChild(td_zoomreset);
-        
-        let td_zoomout = document.createElement("td");
-        let btn_zoomout = document.createElement("button");
-        btn_zoomout.innerText = "Zoom Out";
-        btn_zoomout.onclick=function(){self.cmd_zoomout();}
-        td_zoomout.appendChild(btn_zoomout);
-        row.appendChild(td_zoomout);
-
+        for(let caption_cmdname of this.config.commands){
+                                    var td = document.createElement("td");
+                                    var btn = document.createElement("button");
+                                    btn.innerText = caption_cmdname[0];
+                                    btn.onclick=function(){self[caption_cmdname[1]]();}
+                                    td.appendChild(btn);
+                                    row.appendChild(td);
+        }
         this.commands_div.appendChild(row);
     }
     subtract_rectangle_from_selected(del_LTRB){
@@ -554,55 +439,55 @@ class Canvaces{
         document.onkeydown = null;
         //this.canvaces_div.onkeydown = null;
         var key_listener = function(evt){
-            let shortcut = evt.key.toLowerCase();
-            if(evt.key=="Tab"){
-                this.canvaces_div.focus();
+            if(self.wysiwig){
+                let shortcut = evt.key.toLowerCase();
+                if(evt.key=="Tab"){
+                    this.canvaces_div.focus();
+                }
+                if (evt.ctrlKey) {
+                    shortcut += '+ctrl';
+                }
+                if (evt.altKey) {
+                    shortcut += '+alt';
+                }
+                if (evt.shiftKey) {
+                    shortcut += '+shift';
+                }
+                switch(shortcut){
+                    // mouse modifiers to be ignored
+                    case "alt+alt":
+                    case "control+ctrl":
+                    case "shift+shift":
+                    case "shift+ctrl+shift":
+                        break;
+                    case "=+ctrl":
+                        self.update_scales();
+                        break;
+                    case "-+ctrl":
+                        self.update_scales();
+                        break;
+                    case self.config.shortcut_code_next:
+                        self.cmd_select_next();
+                        break;
+                    case self.config.shortcut_code_previous:
+                            self.cmd_select_prev();
+                        break;
+                    case self.config.shortcut_code_edit:
+                        self.cmd_edit_caption();
+                        break;
+                    case self.config.shortcut_code_delete:
+                        self.cmd_delete_selected();
+                        break;
+                    case self.config.shortcut_code_undelete:
+                        self.cmd_undelete();
+                        break;
+                    case self.config.shortcut_code_merge:
+                        self.cmd_merge_selected();
+                        break;
+                    default:
+                        ui_warn("Unknown code:"+shortcut);
+                }
             }
-            if (evt.ctrlKey) {
-                shortcut += '+ctrl';
-            }
-            if (evt.altKey) {
-                shortcut += '+alt';
-            }
-            if (evt.shiftKey) {
-                shortcut += '+shift';
-            }
-            switch(shortcut){
-                // mouse modifiers to be ignored
-                case "alt+alt":
-                case "control+ctrl":
-                case "shift+shift":
-                case "shift+ctrl+shift":
-                    break;
-                case "=+ctrl":
-                    self.update_scales();
-                    break;
-                case "-+ctrl":
-                    self.update_scales();
-                    break;
-                case self.config.shortcut_code_next:
-                    self.cmd_select_next();
-                    break;
-                case self.config.shortcut_code_previous:
-                        self.cmd_select_prev();
-                    break;
-                case self.config.shortcut_code_edit:
-                    self.cmd_edit_caption();
-                    break;
-                case self.config.shortcut_code_delete:
-                    self.cmd_delete_selected();
-                    break;
-                case self.config.shortcut_code_undelete:
-                    self.cmd_undelete();
-                    break;
-                case self.config.shortcut_code_merge:
-                    self.cmd_merge_selected();
-                    break;
-                default:
-
-                    ui_warn("Unknown code:"+shortcut);
-            }
-
         };
         document.addEventListener("keydown",key_listener);
         //this.onkeydown.addEventListener("keydown",key_listener);
@@ -758,31 +643,13 @@ class Canvaces{
         if(this.rect_LTRB.length>0 && this.active.length>0){
             for(let active of this.active){
                 let ltrb=this.rect_LTRB[active];
-                
-                this.ctx_active.beginPath();
-                this.ctx_active.lineWidth="2";
-                this.ctx_active.strokeStyle="white";
-                this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                this.ctx_active.stroke();
-
-
-                // this.ctx_active.beginPath();
-                // this.ctx_active.lineWidth="8";
-                // this.ctx_active.strokeStyle="black";
-                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                // this.ctx_active.stroke();
-
-                // this.ctx_active.beginPath();
-                // this.ctx_active.lineWidth="4";
-                // this.ctx_active.strokeStyle="white";
-                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                // this.ctx_active.stroke();
-
-                // this.ctx_active.beginPath();
-                // this.ctx_active.lineWidth="2";
-                // this.ctx_active.strokeStyle="black";
-                // this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
-                // this.ctx_active.stroke();
+                for(let style of this.config.active_styles){                
+                    this.ctx_active.beginPath();
+                    this.ctx_active.lineWidth=style.width;
+                    this.ctx_active.strokeStyle=style.color;
+                    this.ctx_active.rect(ltrb[0], ltrb[1], ltrb[2]-ltrb[0], ltrb[3]-ltrb[1]);
+                    this.ctx_active.stroke();
+                }
             }
         }
     }
@@ -821,13 +688,12 @@ class Canvaces{
             const  mouseY=evt.clientY - self.cnv_interactive.offsetTop;
             const scaledX=mouseX / self.canvaces_div.style.width * self.canvaces_div.clientWidth;
             const scaledY=mouseY / self.canvaces_div.style.height * self.canvaces_div.clientHeight;
-            dbg_log("Mouse:("+mouseX+", "+mouseY+")          Scaled:("+scaledX+", "+scaledY+")");
+            //dbg_log("Mouse:("+mouseX+", "+mouseY+")          Scaled:("+scaledX+", "+scaledY+")");
             return {
                 //x: scaledX,
                 //y: scaledY
                 x: mouseX,
                 y: mouseY
-
             };
         }
         function getMousePos(evt) {
