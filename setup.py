@@ -13,7 +13,7 @@ setup(
     packages=['frat'],
     package_data={'frat': ['resources/*.js', 'resources/*.json', 'resources/*.jinja2']},
     include_package_data=True,
-    scripts=['bin/frat', 'bin/frat_config'],
+    scripts=['bin/frat', 'bin/frat_config', 'bin/frat_json2png'],
     license='GPLv3',
     author='Anguelos Nicolaou',
     author_email='anguelos.nicolaou@gmail.com',

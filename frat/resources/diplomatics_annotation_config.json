@@ -18,12 +18,26 @@
     "autosave_freq": 0.03,
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
     "class_colors": [
-        {"name":"No Class","color":"#000000"},
-        {"name":"Seal","color":"#2f4f4f"},
-        {"name":"Text","color":"#00A36C"},
-        {"name":"Document Area","color":"#00FF00"},
-        {"name":"Signature","color":"#00008b"},
-        {"name":"Ignore","color":"#808080"}],
+        {"name":"No Class","color":"#ffe4c4"},
+        {"name":"Ignore","color":"#2f4f4f"},
+        
+        {"name":"E:Seal","color":"#8b4513"},
+        {"name":"E:Text","color":"#006400"},
+        {"name":"E:Signature","color":"#4b0082"},
+        {"name":"E:Ornament","color":"#ff0000"},
+        {"name":"E:Date","color":"#00ced1"},
+        
+        {"name":"Img:Document Area","color":"#ffa500"},
+        {"name":"Img:Calibration","color":"#ffff00"},
+
+        {"name":"Script:Humanistic","color":"#00ff00"},
+        {"name":"Script:NonHumanistic","color":"#0000ff"},
+
+        {"name":"Lang:Latin","color":"#ff00ff"},
+        {"name":"Lang:German","color":"#6495ed"},
+        {"name":"Lang:French","color":"#ff1493"},
+        {"name":"Lang:Other","color":"#98fb98"}
+        ],
     "commands": [
         ["GUI++", "cmd_zoomin"], 
         ["GUI==", "cmd_zoomreset"], 
