@@ -48,7 +48,6 @@ class StringGeneratorWebService(object):
                 [f'{k}</td><td><a href="{v}"><img src="{v}.thumb.jpg"/></a>' for k, v in enumerate(self.ids)])
             return head + body + tail
         else:
-            print("LINE50 id:", page_id)
             id_split = page_id.split(".")
             if page_id == "favicon.ico":
                 cherrypy.response.headers['Content-Type'] = "image/gif"

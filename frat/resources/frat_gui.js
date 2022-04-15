@@ -175,7 +175,7 @@ class Canvaces{
         xhr.open("PUT", url, true);
         xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
         //xhr.onreadystatechange = function () {}; # Was here from POST example
-        const data = JSON.stringify({"rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
+        const data = JSON.stringify({"image_wh":[self.img.width, self.img.height], "rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
         xhr.send(data);
     }
     cmd_autosave(){

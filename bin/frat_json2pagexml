@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import fargv
+import json
+from PIL import Image
+
+
+
+def render_rectangles(rects, class_ids, class_names, transcriptions):
+    attributes = []
+    for n, ((l,t,r,b), class_id, transcription) in enumerate(zip(rects, class_ids, transcriptions)):
+        attributes.append(f"""	<TextRegion id="r{n:03}" type="paragraph" primaryLanguage="English">
+	<Coords points="{l},{t} {r},{t} {r},{b} {l},{b}"/>	
+	<TextEquiv><Unicode>{transcription}</Unicode></TextEquiv>
+	<TextStyle fontFamily="{class_names[class_id]}"/>
+	</TextRegion>
+    """)
+    return "\n".join(attributes)
+
+def render_page_xml(json_name):
+    gt = json.load(open(json_name,"r"))
+    img_fname = json_name[:-5]
+    rects, class_ids, class_names, transcriptions = gt["rect_LTRB"], gt["rect_classes"], gt["class_names"], gt["rect_captions"]
+    if("image_wh" in gt.keys()):
+        image_wh = gt["image_wh"]
+    else:
+        image_wh = Image.open(img_fname).size
+    attributes = render_rectangles(rects, class_ids, class_names, transcriptions)
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15/pagecontent.xsd" pcGtsId="pc-aletheiaexamplepage">
+	<Metadata>
+	    <Creator>FRAT</Creator>
+	    <Created>2015-07-17T15:27:13</Created>
+	    <LastChange>2018-07-19T07:29:57</LastChange>
+	    <Comments>Converted from 2 point rectangles</Comments>
+    </Metadata>
+    <Page imageFilename="{img_fname}" imageWidth="{image_wh[0]}" imageHeight="{image_wh[1]}">
+        {attributes}
+	</Page>
+</PcGts>
+"""
+
+if __name__ == "__main__":
+    p = {
+        "jsons":set([]),
+        "output_postfix":".page.xml"
+    }
+    p,_ = fargv.fargv(p)
+    assert p.output_postfix!=""
+    for json_fname in p.jsons:
+        open(json_fname + p.output_postfix, "w").write(render_page_xml(json_fname))
