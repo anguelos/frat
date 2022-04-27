@@ -3,6 +3,11 @@
     "transcription_font":"Helvetica",
     "transcription_font_size":32,
     "transcription_gap": 48,
+    
+    "commend_begin_marker":"$",
+    "commented_transcription_font_size":48,
+    "commented_transcription_bg_color":"#bbbbbb",
+
     "caption_font":"Calibri",
     "caption_font_size":24,
     "caption_font_shadow_color":"white",
@@ -26,8 +31,10 @@
         {"name":"E:Signature","color":"#4b0082"},
         {"name":"E:Ornament","color":"#ff0000"},
         {"name":"E:Date","color":"#00ced1"},
+        {"name":"E:Modern","color":"#00fed1"},
         
-        {"name":"Img:Document Area","color":"#ffa500"},
+        {"name":"Img:Document Front Area","color":"#ffa500"},
+        {"name":"Img:Document Back Area","color":"#0065ff"},
         {"name":"Img:Calibration","color":"#ffff00"},
 
         {"name":"Script:Humanistic","color":"#00ff00"},

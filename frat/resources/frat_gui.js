@@ -262,6 +262,13 @@ class Canvaces{
             let textbox = document.createElement("input");
             textbox.setAttribute("type", "text");
             textbox.setAttribute("value", this.rect_captions[n]);
+            if (this.rect_captions[n].indexOf(this.config.commend_begin_marker)>=0){
+                textbox.style.fontSize = ""+this.config.commented_transcription_font_size+"px";
+                textbox.style.backgroundColor = this.config.commented_transcription_bg_color
+            }else{
+                textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
+            }
+            textbox.style.fontFamily = this.config.transcription_font;
             textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
             textbox.style.fontFamily = this.config.transcription_font;
             textbox.style.width = "100%";

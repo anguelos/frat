@@ -3,6 +3,11 @@
     "transcription_font":"Helvetica",
     "transcription_font_size":32,
     "transcription_gap": 48,
+    
+    "commend_begin_marker":"$",
+    "commented_transcription_font_size":48,
+    "commented_transcription_bg_color":"#bbbbbb",
+
     "caption_font":"Calibri",
     "caption_font_size":24,
     "caption_font_shadow_color":"white",

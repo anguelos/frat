@@ -38,6 +38,8 @@ if __name__ == "__main__":
                 config_dict = frat.frat_gui_config_diplomatics
             elif p.default_config == "diplomatics":
                 config_dict = frat.frat_gui_config_diplomatics
+            else:
+                raise ValueError
     conf = {
         '/': {
             'log.screen': False,
