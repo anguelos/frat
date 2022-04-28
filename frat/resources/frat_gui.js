@@ -54,8 +54,10 @@ class Canvaces{
             window.onbeforeunload = function () {
                 self.cmd_save();
                 //return "Are you sure to leave this page?Are ya?";
-            };            
-            self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
+            };
+            if(config.autosave_freq != 0){
+                self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
+            }
         }
         this.img.src = img_url;
     }
@@ -175,7 +177,7 @@ class Canvaces{
         xhr.open("PUT", url, true);
         xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
         //xhr.onreadystatechange = function () {}; # Was here from POST example
-        const data = JSON.stringify({"image_wh":[self.img.width, self.img.height], "rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
+        const data = JSON.stringify({"image_wh":[this.img.width, this.img.height], "rect_LTRB":this.rect_LTRB,"rect_captions":this.rect_captions,"rect_classes":this.rect_classes,"class_names":this.class_names,"class_colors":this.class_colors,"user":document.getElementById('user_name').innerHTML});
         xhr.send(data);
     }
     cmd_autosave(){
@@ -262,9 +264,9 @@ class Canvaces{
             let textbox = document.createElement("input");
             textbox.setAttribute("type", "text");
             textbox.setAttribute("value", this.rect_captions[n]);
-            if (this.rect_captions[n].indexOf(this.config.commend_begin_marker)>=0){
+            if (this.rect_captions[n].indexOf(this.config.comment_begin_marker)>=0){
                 textbox.style.fontSize = ""+this.config.commented_transcription_font_size+"px";
-                textbox.style.backgroundColor = this.config.commented_transcription_bg_color
+                textbox.style.backgroundColor = this.config.commented_transcription_bg_color;
             }else{
                 textbox.style.fontSize = ""+this.config.transcription_font_size+"px";
             }

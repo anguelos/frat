@@ -4,7 +4,7 @@
     "transcription_font_size":32,
     "transcription_gap": 48,
     
-    "commend_begin_marker":"$",
+    "comment_begin_marker":"$",
     "commented_transcription_font_size":48,
     "commented_transcription_bg_color":"#bbbbbb",
 
@@ -20,7 +20,7 @@
     "gui_scale":1.0,
     "active_page_border_color":"deeppink",
     "transcription_alpha":0.7,
-    "autosave_freq": 0.03,
+    "autosave_freq": 0,
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
     "class_colors": [
         {"name":"No Class","color":"#ffe4c4"},
