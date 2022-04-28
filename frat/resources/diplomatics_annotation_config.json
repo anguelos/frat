@@ -23,27 +23,21 @@
     "autosave_freq": 0,
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
     "class_colors": [
-        {"name":"No Class","color":"#ffe4c4"},
-        {"name":"Ignore","color":"#2f4f4f"},
+        {"name":"No Class","color":"#646B63"},
+        {"name":"Ignore","color":"#23282B"},
         
-        {"name":"E:Seal","color":"#8b4513"},
-        {"name":"E:Text","color":"#006400"},
-        {"name":"E:Signature","color":"#4b0082"},
-        {"name":"E:Ornament","color":"#ff0000"},
-        {"name":"E:Date","color":"#00ced1"},
-        {"name":"E:Modern","color":"#00fed1"},
-        
-        {"name":"Img:Document Front Area","color":"#ffa500"},
-        {"name":"Img:Document Back Area","color":"#0065ff"},
-        {"name":"Img:Calibration","color":"#ffff00"},
+        {"name":"Img:CalibrationCard","color":"#763C28"},
+        {"name":"Img:Seal","color":"#316650"},
+        {"name":"Img:WritableArea","color":"#00BB2D"},
 
-        {"name":"Script:Humanistic","color":"#00ff00"},
-        {"name":"Script:NonHumanistic","color":"#0000ff"},
+        {"name":"Wr:OldText","color":"#287233"},
+        {"name":"Wr:OldNote","color":"#231A24"},
+        {"name":"Wr:NewText","color":"#F5D033"},
+        {"name":"Wr:NewOther","color":"#063971"},
 
-        {"name":"Lang:Latin","color":"#ff00ff"},
-        {"name":"Lang:German","color":"#6495ed"},
-        {"name":"Lang:French","color":"#ff1493"},
-        {"name":"Lang:Other","color":"#98fb98"}
+        {"name":"WrO:Ornament","color":"#1E2460"},
+        {"name":"WrO:Fold","color":"#641C34"}
+
         ],
     "commands": [
         ["GUI++", "cmd_zoomin"], 
