@@ -35,7 +35,7 @@ if __name__ == "__main__":
             config_dict = json.load(open(p.config_json_path,"r"))
         except IOError: # using default configuration
             if p.default_config == "font":
-                config_dict = frat.frat_gui_config_diplomatics
+                config_dict = frat.frat_gui_config_font
             elif p.default_config == "diplomatics":
                 config_dict = frat.frat_gui_config_diplomatics
             else:
