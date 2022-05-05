@@ -49,5 +49,7 @@
                 ["Transcribe", "cmd_show_transcriptions"], 
                 ["GUI++", "cmd_zoomin"], 
                 ["GUI==", "cmd_zoomreset"], 
-                ["GUI--", "cmd_zoomout"]]
+                ["GUI--", "cmd_zoomout"]],
+    "image_size_divisor":1,
+    "image_size_multiplier":1
 }

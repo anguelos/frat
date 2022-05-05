@@ -54,5 +54,7 @@
         ["Reload", "cmd_reload"], 
         ["Label", "cmd_show_wysiwyg"], 
         ["Transcribe", "cmd_show_transcriptions"]
-]
+],
+"image_size_divisor":2,
+"image_size_multiplier":1
 }

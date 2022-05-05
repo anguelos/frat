@@ -40,18 +40,15 @@ def pillow_to_bytes(img, extention):
     else:
         raise ValueError
 
-
 def create_thumb(fname, format="png", width=100, height=-1):
-    img = Image.open(fname)
+    img_bytes = open(fname, "rb").read()
+    md5_str = hashlib.md5(img_bytes).hexdigest()
+    img = Image.open(io.BytesIO(img_bytes))
     if height<0:
         old_width, old_height = img.size
         height = int((old_height/old_width)*width)
     img = img.resize((width, height))
-    return pillow_to_bytes(img, format)
-    #with io.BytesIO() as output:
-    #    img.save(output, format=format)
-    #    return output.getvalue()
-
+    return pillow_to_bytes(img, format), md5_str
 
 @cherrypy.expose
 class FratWebServer(object):
@@ -67,12 +64,14 @@ class FratWebServer(object):
         self.image_paths = []
         self.json_paths = []
         self.autojson_paths = []
+        
         for n, image_filename in enumerate(tqdm.tqdm(image_filenames, desc="Creating thumbs")):
-            self.thumbs.append(create_thumb(image_filename))
+            thumb, md5id = create_thumb(image_filename)
+            self.thumbs.append(thumb)
             self.image_paths.append(image_filename)
             self.json_paths.append(image_filename+".json")
             self.autojson_paths.append(image_filename+".auto.json")
-            self.image_names_to_idx[str(zlib.crc32(self.thumbs[-1]))] = n
+            self.image_names_to_idx[md5id] = n
         self.config_dict = {}
         if config_dict is None:
             self.config_dict.update(frat_gui_config)
@@ -86,35 +85,42 @@ class FratWebServer(object):
             print(set(frat_gui_config)-set(config_dict.keys()))
             assert set(config_dict.keys()) == set(frat_gui_config.keys())
             self.config_dict.update(config_dict)
+        self.global_image_size_divisor = config_dict["image_size_divisor"]
+        self.global_image_size_multiplier = config_dict["image_size_multiplier"]
+    
+    def scale_json(self, json_str):
+        data = json.loads(json_str)
+        new_data = data.copy()
+        if "image_wh" in new_data.keys():
+            new_data["image_wh"] = [(d*self.global_image_size_multiplier)//self.global_image_size_divisor for d in data["image_wh"]]
+        new_data["rect_LTRB"] = []
+        for rect in data["rect_LTRB"]:
+            scaled_rect = [(d*self.global_image_size_multiplier)//self.global_image_size_divisor for d in rect]
+            new_data["rect_LTRB"].append(scaled_rect)
+        return json.dumps(new_data)
+
+
+    def unscale_json(self, json_str):
+        data = json.loads(json_str)
+        new_data = data.copy()
+        if "image_wh" in new_data.keys():
+            new_data["image_wh"] = [(d*self.global_image_size_divisor)//self.global_image_size_multiplier for d in data["image_wh"]]
+        new_data["rect_LTRB"] = []
+        for rect in data["rect_LTRB"]:
+            unscaled_rect = [(d*self.global_image_size_divisor)//self.global_image_size_multiplier for d in rect]
+            new_data["rect_LTRB"].append(unscaled_rect)
+        return json.dumps(new_data)
+
 
 
     def render_page_image(self, image_id):
         img_path = self.image_paths[self.image_names_to_idx[image_id]]
         img = Image.open(img_path)
+        new_width = (self.global_image_size_multiplier*img.size[0])//self.global_image_size_divisor
+        new_height = (self.global_image_size_multiplier*img.size[1])//self.global_image_size_divisor
+        img = img.resize([new_width, new_height])
         cherrypy.response.headers['Content-Type'] = f"image/{self.image_web_format}"
         return pillow_to_bytes(img, self.image_web_format)
-        # TODO (anguelos) use constructs like the following to confirm Pillow is so much slower than opencv
-        # status, res = cv2.imencode(f".{self.image_web_format.lower()}", np.array(img))
-        # if status:
-        #     return res.tobytes()
-        # with io.BytesIO() as output:
-        #     import time
-        #     import numpy as np
-        #     t=time.time()
-        #     img.save(output, format=self.image_web_format)
-        #     print(f"\n\nsave1 {self.image_web_format}: {time.time()-t}")
-        #     t=time.time()
-        #     img.save(open("/tmp/1.png","wb"), format=self.image_web_format)
-        #     print(f"save2: {time.time()-t}")
-        #     t=time.time()
-        #     arr = np.array(img)
-        #     print(f"save4: {time.time()-t}")
-        #     t=time.time()
-        #     status, res = cv2.imencode(f".{self.image_web_format.lower()}", arr)
-        #     res = res.tobytes()
-        #     print(f"save5: {time.time()-t}")
-        #     #return output.getvalue()
-        #     return res
     
     def render_thumb(self, image_id):
         cherrypy.response.headers['Content-Type'] = f"image/{self.image_web_format}"
@@ -124,9 +130,10 @@ class FratWebServer(object):
         cherrypy.response.headers['Content-Type'] = "application/json"
         json_path = self.json_paths[self.image_names_to_idx[image_id]]
         if(os.path.exists(json_path)):
-            return open(json_path,"r").read().encode('utf8')
+            res_json = self.scale_json(open(json_path,"r").read())
         else:
-            return empty_page_json.encode("utf8")
+            res_json = self.scale_json(empty_page_json)
+        return res_json.encode('utf8')
 
     def render_html(self, image_id):
         cherrypy.response.headers['Content-Type'] = "text/html"
@@ -144,7 +151,6 @@ class FratWebServer(object):
         all_ids = [v[1] for v in sorted([(v, k) for k, v  in self.image_names_to_idx.items()])]
         return str.encode(json.dumps(all_ids))
         
-
 
     @cherrypy.popargs('url_path')
     def GET(self, url_path=""):
@@ -164,6 +170,7 @@ class FratWebServer(object):
                 raise cherrypy.HTTPError(404,"Page "+repr(page_id)+" not registered. "+repr(self.image_names_to_idx))
         elif url_path.endswith(".html"):
             if page_id in self.image_names_to_idx:
+                print(f"Serving {self.image_paths[self.image_names_to_idx[page_id]]}", file=sys.stderr)
                 return self.render_html(page_id)
             else:
                 raise cherrypy.HTTPError(404,"Groundtruth "+repr(page_id)+" not registered")
@@ -181,7 +188,6 @@ class FratWebServer(object):
         elif url_path == "frat_gui.js":
             cherrypy.response.headers['Content-Type'] = "application/javascript"
             return frat_gui_js
-
         elif url_path=="":
             return self.render_index()
         else:
@@ -197,6 +203,7 @@ class FratWebServer(object):
         #print("PUT:" + repr(page_id))
         cl = cherrypy.request.headers['Content-Length']
         json_string = str(cherrypy.request.body.read(int(cl)),'utf-8')
+        json_string = self.unscale_json(json_string)
         if len(id_split) == 2 and id_split[1].lower()=="json": # normal annotation
             try:
                 msg = f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}: saving ID{id_split[0]}"
@@ -222,101 +229,3 @@ class FratWebServer(object):
         else:
             msg = f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}: PUT url:{page_id} could not be understood."
         print(msg)
-
-
-# @cherrypy.expose
-# class StringGeneratorWebService(object):
-#     def __init__(self, image_list, annotator_template):
-#         id_paths = [(hashlib.md5(open(img, "rb").read()).hexdigest(), img) for img in image_list]
-#         self.ids = [id_path[0] for id_path in id_paths]
-#         self.previous_id = {self.ids[k]: self.ids[k - 1] for k in range(1, len(self.ids))}
-#         self.previous_id[self.ids[0]] = ""
-#         self.next_id = {self.ids[k - 1]: self.ids[k] for k in range(1, len(self.ids))}
-#         self.next_id[self.ids[-1]] = ""
-#         self.id2image_fnames = dict(id_paths)
-#         self.id2thumbs = {id: load_thumbd(fname) for id, fname in tqdm.tqdm(self.id2image_fnames.items())}
-#         self.id2json_fnames = {k: v[:v.rfind(".")] + ".json" for k, v in self.id2image_fnames.items()}
-#         # self.json_list=[p[:p.rfind(".")]+".json" for p in image_list]
-#         self.annotator = jinja2.Template(annotator_template)
-
-#     @cherrypy.popargs('id')
-#     def GET(self, page_id=""):
-#         if not page_id:
-#             # return all items
-#             cherrypy.response.headers['Content-Type'] = 'text/html'
-#             head = "<html><body><table><tr><td>\n"
-#             tail = "\n</td></tr></html></body></html>\n"
-#             body = "</td></tr>\n<tr><td>".join(
-#                 [f'{k}</td><td><a href="{v}"><img src="{v}.thumb.jpg"/></a>' for k, v in enumerate(self.ids)])
-#             return head + body + tail
-#         else:
-#             id_split = page_id.split(".")
-#             if page_id == "favicon.ico":
-#                 cherrypy.response.headers['Content-Type'] = "image/gif"
-#                 # return atob("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAO")
-#                 return base64.decode("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAO")
-#             elif page_id == "grouting.js":
-#                 cherrypy.response.headers['Content-Type'] = 'application/javascript'
-#                 return grouting_js
-#             elif len(id_split) == 1:
-#                 cherrypy.response.headers['Content-Type'] = 'text/html'
-#                 page_id = id_split[0]
-#                 return self.annotator.render(page_id=page_id, previous_id=self.previous_id[page_id], next_id=self.next_id[page_id])
-#             elif id_split[-1] == "jpg":
-#                 if id_split[-2] == "thumb":
-#                     print("Returning thumbs", id_split[0])
-#                     cherrypy.response.headers['Content-Type'] = "image/jpg"
-#                     print("Type:", type(self.id2thumbs[id_split[0]]), "  sz:", len(self.id2thumbs[id_split[0]]))
-#                     return self.id2thumbs[id_split[0]]
-#                 else:
-#                     print("Returning image", id_split[0])
-#                     cherrypy.response.headers['Content-Type'] = "image/jpg"
-#                     return open(self.id2image_fnames[id_split[0]], "rb").read()
-#             elif id_split[1] == "json":
-#                 cherrypy.response.headers['Content-Type'] = 'application/json'
-#                 try:
-#                     json_str = open(self.id2json_fnames[id_split[0]]).read()
-#                     print("Returning real json:", json_str)
-#                     return json_str
-#                 except IOError:  # for python3 FileNotFoundError:
-#                     print("Returning fake json.")
-#                     return json.dumps({"rectangles_ltrb": [], "captions": []})
-#             else:
-#                 print("id:", page_id)
-#                 raise
-
-#     def POST(self, length=8):
-#         some_string = ''.join(random.sample(string.hexdigits, int(length)))
-#         cherrypy.session['mystring'] = some_string
-#         return some_string
-
-#     @cherrypy.tools.accept(media='application/json')
-#     def PUT(self, page_id):
-#         id_split = tuple(page_id.split("."))
-#         print("PUT:" + repr(page_id))
-#         cl = cherrypy.request.headers['Content-Length']
-#         json_string = cherrypy.request.body.read(int(cl))
-#         if len(id_split) == 2 and id_split[1].lower()=="json": # normal annotation
-#             try:
-#                 print("\n\nID:", id_split[0],repr(id_split))
-#                 print("json fname", self.id2json_fnames)
-#                 print("fname=", self.id2json_fnames[id_split[0]])
-#                 print("json_str:", repr(json_string))
-#                 open(self.json_paths[self.image_names_to_idx[id_split[0]]], "w").write(json_string)
-#             except:
-#                 raise
-#         elif len(id_split) == 3 and id_split[1:] == ("auto", "json"):
-#             annotation=open(self.json_paths[self.image_names_to_idx[id_split[0]]], "r").read()
-#             auto_annotation=open(self.autojson_paths[self.image_names_to_idx[id_split[0]]], "r").read()
-#             if annotation!=json_string or annotation!=auto_annotation:
-#                 msg = f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')} autosaving {id_split[0]}"
-#                 open(self.autojson_paths[self.image_names_to_idx[id_split[0]]], "w").write(json_string)
-#             else:
-#                 msg = f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')} not autosaving, all equal!"
-#             print(msg)
-#         else:
-#             print(f"PUT: url:{page_id} could not be understood")
-
-
-#     def DELETE(self):
-#         cherrypy.session.pop('mystring', None)

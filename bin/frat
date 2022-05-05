@@ -5,7 +5,6 @@ import json
 import random
 import string
 import cherrypy  # also routes are needed
-import cv2
 import PIL
 import hashlib
 import jinja2
@@ -49,5 +48,7 @@ if __name__ == "__main__":
             'tools.response_headers.headers': [('Content-Type', 'text/plain')],
         }
     }
+    #cherrypy.config.update({ "server.logToScreen" : False })
+    #cherrypy.config.update({'log.screen': False})
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(FratWebServer(p.images,config_dict=config_dict), '/', conf)
