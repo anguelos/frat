@@ -18,7 +18,7 @@ setup(
     #'frat/resources/frat_gui.js']},
     #include_package_data=True,
     package_data={'frat': ['resources/*.*']},
-    scripts=['bin/frat', 'bin/frat_config', 'bin/frat_json2png', 'bin/frat_json2coco'],
+    scripts=['bin/frat', 'bin/frat_config', 'bin/frat_json2png', 'bin/frat_json2coco', 'bin/frat_json2yolov5'],
     license='GPLv3',
     author='Anguelos Nicolaou',
     author_email='anguelos.nicolaou@gmail.com',

@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+
+from turtle import width
+from unicodedata import category
+import fargv
+import json
+from PIL import Image
+import frat
+from pathlib import Path
+from datetime import datetime
+import os
+
+
+def get_classes(frat_config, supercategory="N/A"):
+    return [class_dict["name"] for class_dict in frat_config["class_colors"]]
+
+def make_coco_txt(page_dict):
+    result_lines = []
+    for n in range(len(page_dict["rect_classes"])):
+        p_width, p_height = page_dict["image_wh"]
+        left, top, right, bottom = page_dict["rect_LTRB"][n]
+        width = (right - left) / p_width
+        height = (bottom - top) / p_height
+        center_x = ((left + right) /2.) /p_width
+        center_y = ((top + bottom) /2.) /p_height
+        result_lines.append(f"{page_dict['rect_classes'][n]} {center_x} {center_y} {width} {height}")
+    return "\n".join(result_lines)
+
+
+if __name__ == "__main__":
+    p = {
+        "images":set([]),
+        "root":"./tmp/",
+        "dsname":"train",
+        "output_filename":"{root}/{dsname}/coco_ds.yaml",
+        "output_images":"{root}/{dsname}/images",
+        "output_txts":"{root}/{dsname}/labels",
+        "frat_config_path": "",
+        "default_frat_config":["font", "diplomatics"],
+    }
+
+    args,_ = fargv.fargv(p)
+    if Path(args.frat_config_path).is_file():
+        frat_config = json.load(open(args.frat_config_path))
+    else:
+        if args.default_frat_config == "font":
+            frat_config = frat.frat_gui_config_font
+        elif args.default_frat_config == "diplomatics":
+            frat_config = frat.frat_gui_config_diplomatics
+        else:
+            raise ValueError
+    Path(args.output_images).mkdir(parents=True, exist_ok=True)
+    Path(args.output_txts).mkdir(parents=True, exist_ok=True)
+    classes = get_classes(frat_config)
+    global_file = f"""# created_by_frat
+
+path: {args.root}  # dataset root dir
+train: {args.root}/{args.dsname}  
+val: {args.root}/{args.dsname}  
+test:  # test images (optional)
+
+# Classes 
+nc: {len(classes)} # number of classes
+names: {repr(classes)} 
+
+"""
+
+    open(args.output_filename,"w").write(global_file)
+    for image_fname in sorted(args.images):
+        base_image = image_fname.split('/')[-1]
+        output_image = f"{args.output_images}/{base_image}"
+        open(output_image,"wb").write(open(image_fname,"rb").read())
+        txt_fname  = f"{args.output_txts}/{base_image.split('.')[0]}.txt"
+        page_dict = json.load(open(image_fname+".json","r"))
+        open(txt_fname,"w").write(make_coco_txt(page_dict))
