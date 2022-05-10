@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+
+from turtle import width
+from unicodedata import category
+import fargv
+import json
+from PIL import Image
+import frat
+from pathlib import Path
+from datetime import datetime
+
+
+def get_categories(frat_config, supercategory="N/A"):
+    name2id = {}
+    categories = []
+    for n, (name, _) in enumerate(frat_config["class_colors"]):
+        name2id[name]=n
+        categories.append({"supercategory":supercategory, "id": n, "name": name})
+    return name2id, categories
+
+
+def fill_annotations(page_dict, image_id, current_id):
+    result = []
+    for n in range(len(page_dict["rect_classes"])):
+        left, top, right, bottom = page_dict["rect_LTRB"][n]
+        width = right - left
+        height = bottom - top
+        result.append({
+            'segmentation': [[left,top,right,top,right,bottom,left,bottom]],
+            'iscrowd': 0,
+            'image_id': image_id,
+            'category_id': page_dict["rect_classes"][n],
+            'id': current_id + n,
+            'bbox': [left,top,width,height],
+            'area': width * height})
+    return result, current_id + len(result)
+
+
+
+def update_annotation_ids(annotations, first_id=0):
+    for n, ann in enumerate(annotations):
+        ann["id"] = n + first_id
+
+
+def get_image_dict(image_path, image_id, licence):
+    width, height = Image.open(image_path).size
+    return {"license": licence,
+            "coco_url":"na",
+            "flickr_url":"na",
+            "height": height,
+            "width": width,
+            "date_captured":"na",
+            "id":image_id,
+            "file_name": image_path
+    }
+
+
+if __name__ == "__main__":
+    p = {
+        "idescription": '1000 Charters',
+        "iversion": '1000 Charters',
+        "iyear": "2022",
+        "icontributor":"Anguelos Nicolaou, Daniel Luger, DiDip",
+        "idate_created": datetime.now().strftime("%Y/%m/%d"),
+        "images":set([]),
+        "image_root":"./tmp/",
+        "output_filename":"{image_root}/ann.json",
+        "frat_config_path": "",
+        "default_frat_config":["font", "diplomatics"],
+        "first_image_id":1,
+        "json_extention":".json",
+        "first_annotation_id": 1,
+        "licence_num": 7
+
+    }
+
+    args,_ = fargv.fargv(p)
+    if Path(args.frat_config_path).is_file():
+        frat_config = json.load(open(args.frat_config_path))
+    else:
+        if args.default_frat_config == "font":
+            frat_config = frat.frat_gui_config_font
+        elif args.default_frat_config == "diplomatics":
+            frat_config = frat.frat_gui_config_diplomatics
+        else:
+            raise ValueError
+    id2category_names, categories = get_categories(frat_config)
+
+    info = {"description": args.idescription,
+            "url": "https://www.icar-us.eu/cooperation/online-portals/monasterium-net/",
+            "version": "0.1",
+            "year": 2022,
+            "contributor": "DiDip",
+            "date_created": "2022/05/10"}
+
+    licenses = [{"url": "http://creativecommons.org/licenses/by-nc-sa/2.0/","id": 1,"name": "Attribution-NonCommercial-ShareAlike License"},
+                {"url": "http://creativecommons.org/licenses/by-nc/2.0/","id": 2,"name": "Attribution-NonCommercial License"},
+                {"url": "http://creativecommons.org/licenses/by-nc-nd/2.0/","id": 3,"name": "Attribution-NonCommercial-NoDerivs License"},
+                {"url": "http://creativecommons.org/licenses/by/2.0/","id": 4,"name": "Attribution License"},
+                {"url": "http://creativecommons.org/licenses/by-sa/2.0/","id": 5,"name": "Attribution-ShareAlike License"},
+                {"url": "http://creativecommons.org/licenses/by-nd/2.0/","id": 6,"name": "Attribution-NoDerivs License"},
+                {"url": "http://flickr.com/commons/usage/","id": 7,"name": "No known copyright restrictions"},
+                {"url": "http://www.usa.gov/copyright.shtml","id": 8,"name": "United States Government Work"}]
+
+
+    images = []
+    annotations = []
+    image_id = args.first_image_id
+    annotation_id = args.first_annotation_id
+
+    for image_fname in sorted(args.images):
+        json_fname  = image_fname+args.json_extention# ".".join(json_fname.split(".")[:-1])
+        page_dict = json.load(open(json_fname))
+        images.append(get_image_dict(image_fname, image_id, args.licence_num))
+        image_annotations, annotation_id = fill_annotations(page_dict, image_id=image_id, current_id=annotation_id)
+        annotations+=image_annotations
+        image_id+=1
+    #open(args.output_filename,"w").write()
+    #json.dump({"info": info, "licences":licenses, "categories":categories, "images":images, "annotations":annotations},open(args.output_filename,"w"), indent=2)
+    json.dump({"info": info, "licences":licenses, "categories":categories, "images":images, "annotations":annotations},open(args.output_filename,"w"), indent=2)
