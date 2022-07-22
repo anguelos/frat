@@ -58,6 +58,7 @@ class Canvaces{
             if(config.autosave_freq != 0){
                 self.autosave_interval = setInterval((function(){self.cmd_autosave();}),parseInt(1000.0/config.autosave_freq))
             }
+            self.selected_cur_page.scrollIntoView(true);
         }
         this.img.src = img_url;
     }
@@ -308,6 +309,20 @@ class Canvaces{
     cmd_zoomreset(){
         this.config.gui_scale=1.0;
         this.update_scales();
+    }
+    cmd_increace_transcription_alpha(){
+        this.config.transcription_alpha+=.1
+        if(this.config.transcription_alpha>1.){
+            this.config.transcription_alpha=1.    
+        }
+        this.draw_boxes()
+    }
+    cmd_decreace_transcription_alpha(){
+        this.config.transcription_alpha-=.1
+        if(this.config.transcription_alpha<0.){
+            this.config.transcription_alpha=0.    
+        }
+        this.draw_boxes()
     }
     create_commands(){
         var self = this;
@@ -829,30 +844,34 @@ class Canvaces{
             let tbl_nav=document.createElement("table");
             let tr_nav=document.createElement("tr");
             self.page_links=[]
+            var selected = null;
             for(let page_id of xhr.response){
                 let td_page=document.createElement("td")
                 let a_page=document.createElement("a")
                 a_page.href='/'+page_id+'.html'
                 if(page_id==self.page_id){
+                    selected=document.createElement("div")
+                    selected.id = "selected";
                     this.current_page_link=a_page
                     a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid '+self.config.active_page_border_color+'" />'
-                    
+                    selected.appendChild(a_page);
+                    td_page.appendChild(selected);                    
                 }else{
                     a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
                     a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid black" />'
+                    td_page.appendChild(a_page);
+
                 }
                 function invert(){
                     document.getElementById("theImage").style.filter="invert(100%)";
                 }
 
-                td_page.appendChild(a_page);
                 tr_nav.appendChild(td_page);
                 self.page_links.push(a_page);
             }
             tbl_nav.appendChild(tr_nav)
             self.navigation_div.innerHTML='';
             self.navigation_div.appendChild(tbl_nav);
-
           } else {
             ui_warn("Reloading gt failed status:"+status+" responce:'"+xhr.response+"'");
           }

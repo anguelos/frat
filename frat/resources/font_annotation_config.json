@@ -49,7 +49,10 @@
                 ["Transcribe", "cmd_show_transcriptions"], 
                 ["GUI++", "cmd_zoomin"], 
                 ["GUI==", "cmd_zoomreset"], 
-                ["GUI--", "cmd_zoomout"]],
+                ["GUI--", "cmd_zoomout"],
+                ["Txt++", "cmd_increace_transcription_alpha"],
+                ["Txt--", "cmd_decreace_transcription_alpha"]
+            ],
     "image_size_divisor":1,
     "image_size_multiplier":1
 }

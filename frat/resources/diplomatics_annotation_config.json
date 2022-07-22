@@ -53,8 +53,10 @@
         ["Save", "cmd_save"],
         ["Reload", "cmd_reload"], 
         ["Label", "cmd_show_wysiwyg"], 
-        ["Transcribe", "cmd_show_transcriptions"]
-],
-"image_size_divisor":2,
-"image_size_multiplier":1
+        ["Transcribe", "cmd_show_transcriptions"],
+        ["Txt++", "cmd_increace_transcription_alpha"],
+        ["Txt--", "cmd_decreace_transcription_alpha"]
+    ],
+    "image_size_divisor":2,
+    "image_size_multiplier":1
 }
