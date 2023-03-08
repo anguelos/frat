@@ -54,5 +54,8 @@
                 ["Txt--", "cmd_decreace_transcription_alpha"]
             ],
     "image_size_divisor":1,
-    "image_size_multiplier":1
+    "image_size_multiplier":1,
+    "img2itempath_regex":".*",
+    "gt_filextention": ".json",
+    "autogt_filextention": ".auto.json"
 }

@@ -14,7 +14,8 @@ function dbg_show(msg){
 
 class Canvaces{
     constructor(id,class_selection,transcription_divid,
-        wysiwig_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, img_url, config){
+        wysiwig_divid,config_divid, navigation_divid, canvaces_divid,commands_divid, selected_divid, 
+        img_url, config){
         var self = this;
         this.page_id = id;
         this.class_selection_ui = class_selection

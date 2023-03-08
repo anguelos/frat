@@ -21,6 +21,8 @@ from PIL import Image
 import cv2
 from cherrypy.lib import file_generator
 import numpy as np
+import re
+
 
 #grouting_js = pkgutil.get_data(__name__, "resources/grouting.js").decode("utf-8")
 #grouting_jinja2 = pkgutil.get_data(__name__, "resources/grouting_webpage.jinja2").decode("utf-8")
@@ -29,6 +31,7 @@ frat_gui_js = pkgutil.get_data(__name__, "resources/frat_gui.js").decode("utf-8"
 frat_webpage_jinja2 = pkgutil.get_data(__name__, "resources/frat_webpage.jinja2").decode("utf-8")
 empty_page_json = pkgutil.get_data(__name__, "resources/empty_page.json").decode("utf-8")
 frat_gui_config = json.loads(pkgutil.get_data(__name__, "resources/font_annotation_config.json").decode("utf-8"))
+
 
 def pillow_to_bytes(img, extention):
     img = np.array(img)
@@ -52,26 +55,27 @@ def create_thumb(fname, format="png", width=100, height=-1):
 
 @cherrypy.expose
 class FratWebServer(object):
-    def __init__(self, image_filenames, image_web_format="png", html_template=None, config_dict=None) -> None:
-        super().__init__()
-        if html_template == None:
-            self.html_template = jinja2.Template(frat_webpage_jinja2)
-        else:
-            self.html_template = jinja2.Template(html_template)
-        self.image_web_format = image_web_format
+    def load_from_local_images(self, image_filenames, img2itempath_regex, gt_filextention, autogt_filextention):
         self.thumbs = []
         self.image_names_to_idx = {}
         self.image_paths = []
         self.json_paths = []
         self.autojson_paths = []
-        
+        self.image_urls = []
         for n, image_filename in enumerate(tqdm.tqdm(image_filenames, desc="Creating thumbs")):
             thumb, md5id = create_thumb(image_filename)
+            self.image_urls.append(f"{md5id}.png")
             self.thumbs.append(thumb)
             self.image_paths.append(image_filename)
-            self.json_paths.append(image_filename+".json")
-            self.autojson_paths.append(image_filename+".auto.json")
+            image_base_paths = re.findall(img2itempath_regex, image_filename)
+            assert len(image_base_paths) >= 1 and len(image_base_paths[0]) > 0
+            self.json_paths.append(image_base_paths[0]+gt_filextention)
+            self.autojson_paths.append(image_base_paths[0]+autogt_filextention)
             self.image_names_to_idx[md5id] = n
+
+
+    def __init__(self, image_filenames, image_web_format="png", html_template=None, config_dict=None) -> None:
+        super().__init__()
         self.config_dict = {}
         if config_dict is None:
             self.config_dict.update(frat_gui_config)
@@ -85,8 +89,22 @@ class FratWebServer(object):
             print(set(frat_gui_config)-set(config_dict.keys()))
             assert set(config_dict.keys()) == set(frat_gui_config.keys())
             self.config_dict.update(config_dict)
+
+        if html_template == None:
+            self.html_template = jinja2.Template(frat_webpage_jinja2)
+        else:
+            self.html_template = jinja2.Template(html_template)
+
+        self.image_web_format = image_web_format
+        print("INIT", self.config_dict)
+        self.load_from_local_images(image_filenames, 
+                                    img2itempath_regex=self.config_dict["img2itempath_regex"], 
+                                    gt_filextention=self.config_dict["gt_filextention"],
+                                    autogt_filextention=self.config_dict["autogt_filextention"])
+
         self.global_image_size_divisor = config_dict["image_size_divisor"]
         self.global_image_size_multiplier = config_dict["image_size_multiplier"]
+        
     
     def scale_json(self, json_str):
         data = json.loads(json_str)
@@ -137,7 +155,7 @@ class FratWebServer(object):
 
     def render_html(self, image_id):
         cherrypy.response.headers['Content-Type'] = "text/html"
-        return self.html_template.render(id=image_id)
+        return self.html_template.render(id=image_id, img_url=self.image_urls[self.image_names_to_idx[image_id]])
 
     def render_index(self):
         cherrypy.response.headers['Content-Type'] = "text/html"
@@ -150,7 +168,7 @@ class FratWebServer(object):
         cherrypy.response.headers['Content-Type'] = "application/json"
         all_ids = [v[1] for v in sorted([(v, k) for k, v  in self.image_names_to_idx.items()])]
         return str.encode(json.dumps(all_ids))
-        
+
 
     @cherrypy.popargs('url_path')
     def GET(self, url_path=""):
@@ -204,6 +222,13 @@ class FratWebServer(object):
         cl = cherrypy.request.headers['Content-Length']
         json_string = str(cherrypy.request.body.read(int(cl)),'utf-8')
         json_string = self.unscale_json(json_string)
+
+
+        img_md5 = page_id.split("/")[-1].split(".")[0]
+        json_dict = json.loads(json_string)
+        json_dict["img_md5"] = img_md5
+        json_string = json.dumps(json_dict)
+
         if len(id_split) == 2 and id_split[1].lower()=="json": # normal annotation
             try:
                 msg = f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}: saving ID{id_split[0]}"
