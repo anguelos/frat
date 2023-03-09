@@ -1,3 +1,9 @@
+## (F)ast (R)ectangle (A)nnotation (T)ool
+#### When rectangles are enough!
+
+[![Documentation build status]https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
 Relevant Resources:
 [Multifont OCR-D](https://ocr-d.de/en/gt-guidelines/trans/lySchriftarten.html)
 
