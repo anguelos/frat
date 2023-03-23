@@ -848,20 +848,24 @@ class Canvaces{
             var selected = null;
             for(let page_id of xhr.response){
                 let td_page=document.createElement("td")
+                td_page.style.verticalAlign = "top";
                 let a_page=document.createElement("a")
                 a_page.href='/'+page_id+'.html'
                 if(page_id==self.page_id){
                     selected=document.createElement("div")
                     selected.id = "selected";
                     this.current_page_link=a_page
-                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid '+self.config.active_page_border_color+'" />'
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid '+self.config.active_page_border_color+'"/>'
                     selected.appendChild(a_page);
-                    td_page.appendChild(selected);                    
+                    td_page.appendChild(selected);
+//                    td_page.style.background = "#808080";
+//                    td_page.style.border = "thick solid #0000FF"
                 }else{
-                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
-                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid black" />'
+                    //a_page.innerHTML='<img src="/'+page_id+'.thumb.png" height="100px" />'
+                    a_page.innerHTML='<img src="/'+page_id+'.thumb.png" style="height=90px;border:5px solid black"/>'
                     td_page.appendChild(a_page);
-
+//                    td_page.style.background = "#D0D0D0";
+//                    td_page.style.border = "thick solid #0000FF"
                 }
                 function invert(){
                     document.getElementById("theImage").style.filter="invert(100%)";

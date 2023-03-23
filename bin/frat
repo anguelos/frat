@@ -25,18 +25,22 @@ import json
 
 
 if __name__ == "__main__":
-    p={"images":[set([]), "the images to be groundtruthed"], 
-       "config_json_path":".frat_config.json",
-       "default_config":["font", "seals"]}
+    p={
+        "images":[set([]), "the images to be groundtruthed"], 
+        "config_json_path":".frat_config.json",
+        "default_config":[("font", "seals", "resolution"),"The frat mode beeing used"]
+       }
     p, _ = fargv.fargv(p)
     if len(p.config_json_path)>0:
         try:
             config_dict = json.load(open(p.config_json_path,"r"))
-        except IOError: # using default configuration
+        except FileNotFoundError: # using default configuration
             if p.default_config == "font":
                 config_dict = frat.frat_gui_config_font
             elif p.default_config == "seals":
                 config_dict = frat.frat_gui_config_seals
+            elif p.default_config == "resolution":
+                config_dict = frat.frat_gui_config_resolution
             else:
                 raise ValueError
     conf = {
