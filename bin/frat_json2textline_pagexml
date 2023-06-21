@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+import html
+import json
+from datetime import datetime
+from itertools import chain
+from pathlib import Path
+
+import fargv
+from PIL import Image
+from shapely import normalize, intersection
+from shapely.geometry import Polygon, MultiPolygon
+
+
+def render_textareas(rects: list, class_ids: list, class_names: list, transcriptions: list, page_poly: Polygon,
+                     baseline_lineheight: int = 0.25) -> str:
+    """ Creates a xml representation string with an overall TextRegion (convex hull) and
+     TextLines with generic baselines """
+    pts = ([Polygon([(l, t), (r, t), (r, b), (l, b)]) for (l, t, r, b) in rects])
+    tr = MultiPolygon(pts).convex_hull
+    tr.buffer(5)
+    tr = normalize(intersection(page_poly, tr))
+
+    attributes = [(f"""<ReadingOrder>
+            <OrderedGroup id="ro_1" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="tr_1"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion id="tr_1" type="paragraph" custom="readingOrder {{index:0;}}">
+	        <Coords points="{' '.join([str(int(x)) + ',' + str(int(y)) for x, y in tr.exterior.coords[:-1]])}"/>""")]
+    for n, ((l, t, r, b), class_id, transcription) in enumerate(zip(rects, class_ids, transcriptions)):
+        # HTML escaping of transcription text is required
+        attributes.append(f"""\n            <TextLine id="tr_1_tl_{n}" custom="readingOrder {{index:{n};}}">
+	            <Coords points="{l},{t} {r},{t} {r},{b} {l},{b}"/>
+	            <Baseline points="{l},{b + int((t - b) * baseline_lineheight)} {r},{b + int((t - b) * baseline_lineheight)}"/>
+	            <TextEquiv>
+	                <Unicode>{html.escape(transcription)}</Unicode>
+	            </TextEquiv>
+	            <TextStyle fontFamily="{class_names[class_id]}"/>
+	        </TextLine>""")
+    attributes.append(f"""	    </TextRegion>""")
+    return "\n".join(attributes)
+
+
+def render_page_xml(json_name: str) -> str:
+    """ Renders a valid PAGE XML (convention with eScriptorium) from a JSON (output of FRAT)"""
+    gt = json.load(open(json_name, "r"))
+    img_fname = json_name[:-5]
+    rects, class_ids, class_names, transcriptions = gt["rect_LTRB"], gt["rect_classes"], gt["class_names"], \
+        gt["rect_captions"]
+    if ("image_wh" in gt.keys()):
+        image_wh = gt["image_wh"]
+    else:
+        image_wh = Image.open(img_fname).size
+    page_poly = Polygon([(0, 0), (image_wh[0], 0), (image_wh[0], image_wh[1]), (0, image_wh[1])])
+    attributes = render_textareas(rects, class_ids, class_names, transcriptions, page_poly)
+    current_date_time = datetime.now()
+    formatted_date_time = current_date_time.strftime("%Y-%m-%dT%H:%M:%S")
+    return f"""<?xml version="1.0" encoding="UTF-8"  standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15/pagecontent.xsd">
+	<Metadata>
+	    <Creator>FRAT</Creator>
+	   	<Created>{formatted_date_time}</Created>
+	    <LastChange>{formatted_date_time}</LastChange>
+	    <Comments>Converted from 2 point rectangles</Comments>
+    </Metadata>
+    <Page imageFilename="{Path(img_fname).name}" imageWidth="{image_wh[0]}" imageHeight="{image_wh[1]}">
+        {attributes}
+	</Page>
+</PcGts>
+"""
+
+
+if __name__ == "__main__":
+    p = {
+        "jsons": set([]),
+        "output_postfix": ".page.xml"
+    }
+    p, _ = fargv.fargv(p)
+    print(p)
+    assert p.output_postfix != ""
+    for json_fname in p.jsons:
+        # render_page_xml(json_fname)
+        open(json_fname + p.output_postfix, "w").write(render_page_xml(json_fname))
