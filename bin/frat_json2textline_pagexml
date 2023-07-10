@@ -65,7 +65,16 @@ def render_textareas(rects: list, class_ids: list, class_names: list, transcript
 
 
 def render_page_xml(json_name: str) -> str:
-    """ Renders a valid PAGE XML (convention with eScriptorium) from a JSON (output of FRAT)"""
+    """ Renders a valid PAGE XML (convention with eScriptorium) from a JSON (output of FRAT)
+
+    Extended description:
+    This script only works without errors if no multilines per box were transcribed with Frat.
+    It converts all boxes into TextLine polygons and creates a pseudo-baseline at a height of 25% from
+    the bottom edge of the box. (The psuedobaseline calculation could be extended for other cases.)
+    A convex hull is calculated that encompasses all TextLines and serves as a TextRegion.
+    The rendered file can be imported into various transcription tools such as
+    eScriptorium and used to train layout and transcription models.
+    """
     gt = json.load(open(json_name, "r"))
     img_fname = json_name[:-5]
     rects, class_ids, class_names, transcriptions = gt["rect_LTRB"], gt["rect_classes"], gt["class_names"], \
