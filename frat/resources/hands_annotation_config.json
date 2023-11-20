@@ -1,5 +1,5 @@
 {
-    "annotation_readme": "This schema is intended to annotate lengths (diagonals) of fixed length in an image",
+    "annotation_readme": "This schema is intended to annotate multiple hands in a single page",
     "user":"NA",
     "transcription_font":"Helvetica",
     "transcription_font_size":32,
@@ -24,12 +24,21 @@
     "autosave_freq": 0,
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
     "class_colors": [
-        {"name":"5cm","color":"#88FF88"},
-        {"name":"1cm","color":"#00FF00"},
-        {"name":"5in","color":"#8888FF"},
-        {"name":"1in","color":"#0000FF"},
-        {"name":"Undefined","color":"#FF0000"},
-        {"name":"CalibrationWhite","color":"#FFFF00"}
+        {"name":"Non Text","color":"#646B63"},
+        {"name":"Ignore","color":"#23282B"},
+        
+        {"name":"Par:Hand1","color":"#763C28"},
+        {"name":"Par:Hand2","color":"#316650"},
+        {"name":"Par:Hand3","color":"#00BB2D"},
+
+        {"name":"Par:Hand4","color":"#287233"},
+        {"name":"Par:Hand5","color":"#231A24"},
+        {"name":"Par:Hand6","color":"#F5D033"},
+
+        {"name":"Word","color":"#1E2460"},
+        {"name":"Textline","color":"#641C34"},
+        {"name":"Annotation","color":"#063971"}
+
         ],
     "commands": [
         ["GUI++", "cmd_zoomin"], 
@@ -49,9 +58,9 @@
         ["Txt++", "cmd_increace_transcription_alpha"],
         ["Txt--", "cmd_decreace_transcription_alpha"]
     ],
-    "image_size_divisor":1,
-    "image_size_multiplier":4,
+    "image_size_divisor":2,
+    "image_size_multiplier":1,
     "img2itempath_regex":".*\/+[^.]*",
-    "gt_filextention": ".resolution.gt.json",
-    "autogt_filextention": ".resolution.gt.json.auto"
+    "gt_filextention": ".seals.gt.json",
+    "autogt_filextention": ".seals.gt.json.auto"
 }

@@ -28,7 +28,7 @@ if __name__ == "__main__":
     p={
         "images":[set([]), "the images to be groundtruthed"], 
         "config_json_path":".frat_config.json",
-        "default_config":[("font", "seals", "resolution"),"The frat mode beeing used"]
+        "default_config":[("font", "seals", "resolution", "hands"),"The frat mode beeing used"]
        }
     p, _ = fargv.fargv(p)
     if len(p.config_json_path)>0:
@@ -41,6 +41,8 @@ if __name__ == "__main__":
                 config_dict = frat.frat_gui_config_seals
             elif p.default_config == "resolution":
                 config_dict = frat.frat_gui_config_resolution
+            elif p.default_config == "hands":
+                config_dict = frat.frat_gui_config_hands
             else:
                 raise ValueError
     conf = {

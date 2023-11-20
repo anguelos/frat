@@ -1,4 +1,5 @@
 {
+    "annotation_readme":"Annotating textline transcriptions and their font types as described in <https://arxiv.org/pdf/2305.07131.pdf>",
     "user":"NA",
     "transcription_font":"Helvetica",
     "transcription_font_size":32,

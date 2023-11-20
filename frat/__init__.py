@@ -6,9 +6,11 @@ import json
 import pkgutil
 
 frat_gui_js = pkgutil.get_data(__name__, "resources/frat_gui.js").decode("utf-8")
+
 frat_gui_config_seals = json.loads(pkgutil.get_data(__name__, "resources/seals_annotation_config.json").decode("utf-8"))
 frat_gui_config_font = json.loads(pkgutil.get_data(__name__, "resources/font_annotation_config.json").decode("utf-8"))
 frat_gui_config_resolution = json.loads(pkgutil.get_data(__name__, "resources/resolution_annotation_config.json").decode("utf-8"))
+frat_gui_config_hands = json.loads(pkgutil.get_data(__name__, "resources/hands_annotation_config.json").decode("utf-8"))
 frat_gui_config = json.loads(pkgutil.get_data(__name__, "resources/font_annotation_config.json").decode("utf-8"))
 frat_webpage_jinja2 = pkgutil.get_data(__name__, "resources/frat_webpage.jinja2").decode("utf-8")
 
