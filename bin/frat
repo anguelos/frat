@@ -56,5 +56,5 @@ if __name__ == "__main__":
     }
     #cherrypy.config.update({ "server.logToScreen" : False })
     #cherrypy.config.update({'log.screen': False})
-    cherrypy.server.socket_host = '0.0.0.0'
+    #cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(FratWebServer(p.images,config_dict=config_dict), '/', conf)
