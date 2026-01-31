@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import sys
 import fargv
 import frat
@@ -12,37 +13,80 @@ def validate_config(config):
 
 
 if __name__ == "__main__":
-    p={
+    args={
         "config_json_path":".frat_config.json",
-        "cmd":("create","list_keys","set","get", "print"),
+        "cmd":("create","list_keys","set","get", "print", "validate_files", "update_files"),
         "indent": 2,
         "username":"auto",
         "key": "transcription_font",
         "value": "Helvetica",
+        "gt_files": set([]),
     }
-    p, _ = fargv.fargv(p)
+    args, _ = fargv.fargv(args)
     try:
-        config = json.load(open(p.config_json_path, "r"))
+        config = json.load(open(args.config_json_path, "r"))
+        print(f"Loaded config from {args.config_json_path}", file=sys.stderr)
     except IOError:
-        print(f"Could not load config from {p.config_json_path}, using default", file=sys.stderr)
+        print(f"Could not load config from {args.config_json_path}, using default", file=sys.stderr)
         config = {k:v for k, v in frat.frat_gui_config.items()}
-        if p.username == "auto":
+        if args.username == "auto":
             config["user"] = getpass.getuser()
         else:
-            config["user"] = p.username
-    if p.cmd == "create":
-        if not os.path.exists(p.config_json_path):
-            open(p.config_json_path,"w").write(json.dumps(config, indent=p.indent))
+            config["user"] = args.username
+    if args.cmd == "create":
+        if not os.path.exists(args.config_json_path):
+            open(args.config_json_path,"w").write(json.dumps(config, indent=args.indent))
         else:
-            print(f"{p.config_json_path} exists, can't overwrite", file=sys.stderr)
-    elif p.cmd == "set":
-        config[p.key] = type(config[p.key])(p.value)
-        open(p.config_json_path).write(json.dumps(config, indent=p.indent))
-    elif p.cmd == "get":
-        print("p.key: ", config[p.key])
-    elif p.cmd == "list_keys":
+            print(f"{args.config_json_path} exists, can't overwrite", file=sys.stderr)
+    elif args.cmd == "set":
+        config[args.key] = type(config[args.key])(args.value)
+        open(args.config_json_path,"w").write(json.dumps(config, indent=args.indent))
+    elif args.cmd == "get":
+        print("args.key: ", config[args.key])
+    elif args.cmd == "list_keys":
         print(" ".join(config.keys()))
-    elif p.cmd == "print":
-        print(json.dumps(config, indent=p.indent))
+    elif args.cmd == "print":
+        print(json.dumps(config, indent=args.indent))
+    elif args.cmd == "validate_files":
+        config_class_colors = [c["color"] for c in config["class_colors"]]
+        config_class_names = [c["name"] for c in config["class_colors"]]
+        for fname in args.gt_files:
+            filedata = json.load(open(fname,"r"))
+            class_scheme_agrees = sorted(filedata["class_names"]) == sorted(config_class_names)
+            active_classes = set([filedata["class_names"][n] for n in filedata["rect_classes"]])
+            classes_compatible = active_classes <= set(config_class_names)
+            if classes_compatible:
+                file_rect_colors = [filedata["class_colors"][n] for n in filedata["rect_classes"]]
+                config_rect_colors = [config_class_colors[config_class_names.index(cname)] for cname in active_classes]
+                colors_agree = file_rect_colors == config_rect_colors
+            else:
+                colors_agree = False
+            filenames_agree = fname.endswith(config["gt_filextention"])
+            class_scheme_print = {True: "Classes agree: \u2705, ", False: "Classes do not agree \u274C, "}[class_scheme_agrees]
+            classes_compatible_print = {True: "Active classes compatible: \u2705, ", False: "Active classes not compatible \u274C, "}[classes_compatible]
+            colors_agree_print = {True: "Colors agree: \u2705, ", False: "Colors do not agree \u274C, "}[colors_agree]
+            filenames_agree_print = {True: "Filename agrees: \u2705, ", False: "Filename does not agree \u274C, "}[filenames_agree]
+            res = f"{fname}: {class_scheme_print} {classes_compatible_print} {colors_agree_print} {filenames_agree_print}"
+            print(res)
+    elif args.cmd == "update_files":
+        config_class_colors = [c["color"] for c in config["class_colors"]]
+        config_class_names = [c["name"] for c in config["class_colors"]]
+        for fname in args.gt_files:
+            filedata = json.load(open(fname,"r"))
+            file_class_names = [cname for cname in filedata["class_names"]]
+            rect_class_names = [file_class_names[n] for n in filedata["rect_classes"]]
+            rect_class_ids = [config_class_names.index(cname) for cname in rect_class_names]
+            assert all([cid>=0 for cid in rect_class_ids]), "Some class names in the file are not in the config"
+            filedata["class_names"] = config_class_names
+            filedata["class_colors"] = config_class_colors
+            filedata["rect_classes"] = rect_class_ids
+            new_fname = fname
+            if not fname.endswith(config["gt_filextention"]):
+                new_fname = f"{fname}.{config['gt_filextention']}"
+            if not Path(new_fname).exists():
+                open(new_fname,"w").write(json.dumps(filedata, indent=args.indent))
+            else:
+                raise ValueError(f"{new_fname} exists, won't overwrite")
+            print(f"Updated {fname} -> {new_fname}")
     else:
         raise ValueError

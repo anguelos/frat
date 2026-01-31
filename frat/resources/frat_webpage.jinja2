@@ -163,7 +163,7 @@
 
 
         function page_load(){
-            classesUI = new ClassIdEditor(http_config["class_colors"], "class_editor", "class_selector");
+            classesUI = new ClassIdEditor(http_config, "class_editor", "class_selector");
             classesUI.write_gui(http_config["class_colors"]);
             canvaces = new Canvaces("{{id}}",classesUI,"transcriptions","wysiwyg","config_editor","navigation","canvaces","command_buttons", "active","{{img_url}}", http_config);
         }

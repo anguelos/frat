@@ -23,6 +23,7 @@
     "transcription_alpha":0.2,
     "autosave_freq": 0.03,
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
+    "class_selector_button_wrap":11,
     "class_colors": [
         {"name":"No Class","color":"#000000"},
         {"name":"Textura","color":"#2f4f4f"},

@@ -956,8 +956,10 @@ class Canvaces{
 
 
 class ClassIdEditor{
-    constructor(values, editor_div_id, selector_div_id){
+    constructor(config, editor_div_id, selector_div_id){
+        this.config = config;
         this.frat_ui = null;
+        let values = config["class_colors"];
         var self = this; // For this acces in callbacks
 
         this.class_names = [];
@@ -999,8 +1001,7 @@ class ClassIdEditor{
                 ui_error("At least one class is required, have "+self.dom_edit_tablebody.rows.length);
             }
         }
-        this.dom_edit_tablefoot.appendChild(this.btn_remove);
-
+        this.dom_edit_tablefoot.appendChild(this.btn_remove);        
         this.btn_reset = document.createElement("button");
         this.btn_reset.innerHTML = "Reset";
         this.btn_reset.onclick = function(){
@@ -1113,13 +1114,20 @@ class ClassIdEditor{
         this.class_buttons=[];
         let dom_select_table = document.createElement("table");
         let dom_selet_row = document.createElement("tr");
-        for(let i=0;i<this.class_names.length;i++){
+        let button_wrap = this.config.class_selector_button_wrap;
+        for(let i=0;i < this.class_names.length;i++){
+            // wrapping row
+            if (i>= button_wrap && i % button_wrap == 0){
+                dom_select_table.appendChild(dom_selet_row);
+                dom_selet_row = document.createElement("tr");
+            } 
             let btn_num = i;
             let dom_td = document.createElement("td");
             let dom_btn = document.createElement("button");
             dom_btn.type="button";
             dom_btn.id = "class_choice_"+i;
             dom_btn.innerHTML = this.class_names[i];
+            dom_btn.style.width = "100%";
             //dom_btn.style.background = this.class_colors[i];
             //dom_btn.style.textShadow = "0px 0px 4px #666666,0px 0px 2px #FFFFFF";
             dom_btn.style.textShadow = "0px 0px 3px "+this.class_colors[i];

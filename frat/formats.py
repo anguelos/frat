@@ -1,5 +1,7 @@
+from pathlib import Path
 import numpy as np
-from typing import Union, List, Tuple
+from typing import Generator, Union, List, Tuple
+import json
 
 
 def htmlrgb_to_uint8(color:Union[Tuple[str], List[str], str]):
@@ -107,3 +109,25 @@ def rectangles_to_gray(rect_list, rect_classes, output_size, multiclass=True):
         return class_images.sum(axis=0).astype(np.uint8)
     else:
         return class_images.max(axis=0).astype(np.uint8)
+
+
+def get_rectangles(gt_dict: Union[dict ,str]) -> Generator[Tuple[List[int], int, str, List[int], Tuple[float, float, float, float]], None, None]:
+    if isinstance(gt_dict, str) and Path(gt_dict).is_file():
+        gt_dict = json.load(open(gt_dict, "r"))
+    elif isinstance(gt_dict, str):
+        try:
+            gt_dict =json.loads(gt_dict)
+        except json.JSONDecodeError:
+            raise ValueError("gt_dict is a string but not a valid JSON or file path")
+    else:
+        assert isinstance(gt_dict, dict)
+    LTRB = gt_dict["rect_LTRB"]
+    captions = gt_dict["rect_captions"]
+    class_names = {n: cl_names for n, cl_names in enumerate(gt_dict["class_names"])}
+    class_colors = {n: cl_colors for n, cl_colors in enumerate(gt_dict["class_colors"])}
+    rect_classes = [gt_dict["rect_classes"][n] for n in range(len(LTRB))]
+    rect_colors = [class_colors[rect_classes[n]] for n in range(len(LTRB))]
+    width, height = gt_dict["image_wh"]
+    relative_rects = [(l/width, t/height, r/width, b/height) for l,t,r,b in LTRB]
+    for n in range(len(LTRB)):
+        yield LTRB[n], rect_classes[n], captions[n], rect_colors[n], relative_rects[n]

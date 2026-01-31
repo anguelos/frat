@@ -1,6 +1,7 @@
 {
-    "annotation_readme": "Annotating all visual (external) features of charter images as described in <https://arxiv.org/pdf/2306.14071.pdf>",
-    "user":"NA",
+    "annotation_readme": "Annotating all visual (external) features of charter images as described in <https://arxiv.org/pdf/2306.14071.pdf> Updated for illuminated charterswith additional classes for illuminated features.",
+
+    "user":"Martin_Roland",
     "transcription_font":"Helvetica",
     "transcription_font_size":32,
     "transcription_gap": 48,
@@ -25,22 +26,33 @@
     "active_styles":[{"width":4, "color":"white"}, {"width":2, "color":"black"}],
     "class_selector_button_wrap":11,
     "class_colors": [
-        {"name":"No Class","color":"#646B63"},
-        {"name":"Ignore","color":"#23282B"},
-        
-        {"name":"Img:CalibrationCard","color":"#763C28"},
-        {"name":"Img:Seal","color":"#316650"},
-        {"name":"Img:WritableArea","color":"#00BB2D"},
+    {"name":"No Class","color":"#9AA0A6"},
+    {"name":"Ignore","color":"#111317"},
 
-        {"name":"Wr:OldText","color":"#287233"},
-        {"name":"Wr:OldNote","color":"#231A24"},
-        {"name":"Wr:NewText","color":"#F5D033"},
-        {"name":"Wr:NewOther","color":"#063971"},
+    {"name":"Img:CalibrationCard","color":"#FF2D2D"},
+    {"name":"Img:Seal","color":"#00C2FF"},
+    {"name":"Img:WritableArea","color":"#00E676"},
 
-        {"name":"WrO:Ornament","color":"#1E2460"},
-        {"name":"WrO:Fold","color":"#641C34"}
+    {"name":"Wr:OldText","color":"#1E40FF"},
+    {"name":"Wr:OldNote","color":"#8E24AA"},
+    {"name":"Wr:NewText","color":"#FFD400"},
+    {"name":"Wr:NewOther","color":"#FF6D00"},
 
-        ],
+    {"name":"WrO:Ornament","color":"#00BFA5"},
+    {"name":"WrO:Fold","color":"#FF00A8"},
+
+    {"name":"WrO:Initial","color":"#18FFFF"},
+    {"name":"WrO:Chrismon","color":"#651FFF"},
+    {"name":"WrO:DisplayScript","color":"#FFEA00"},
+
+    {"name":"Wr:Panel","color":"#7CFF00"},
+    {"name":"Wr:Border","color":"#00FF8A"},
+    {"name":"Wr:CoatOfArms","color":"#FF3D00"},
+    {"name":"Wr:Benevalete","color":"#FF4081"},
+    {"name":"Wr:Rota","color":"#00E5FF"},
+    {"name":"Wr:Notarial","color":"#C6FF00"},
+    {"name":"Wr:Recognitionis","color":"#D500F9"}
+    ],
     "commands": [
         ["GUI++", "cmd_zoomin"], 
         ["GUI==", "cmd_zoomreset"], 
@@ -62,6 +74,6 @@
     "image_size_divisor":2,
     "image_size_multiplier":1,
     "img2itempath_regex":".*\/+[^.]*",
-    "gt_filextention": ".seals.gt.json",
-    "autogt_filextention": ".seals.gt.json.auto"
+    "gt_filextention": ".illuminated.gt.json",
+    "autogt_filextention": ".illuminated.gt.json.auto"
 }
