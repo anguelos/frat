@@ -29,7 +29,8 @@ if __name__ == "__main__":
         "images":[set([]), "the images to be groundtruthed"], 
         "config_json_path":".frat_config.json",
 #        "default_config":[("font", "seals", "resolution", "hands", "illuminated"),"The frat mode beeing used"]
-        "default_config":[("illuminated", "font", "seals", "resolution", "hands"),"The frat mode beeing used"]
+        "default_config":[("illuminated", "font", "seals", "resolution", "hands"),"The frat mode beeing used"],
+        "port": "8080",
        }
     p, _ = fargv.fargv(p)
     if len(p.config_json_path)>0:
@@ -60,4 +61,5 @@ if __name__ == "__main__":
     #cherrypy.config.update({ "server.logToScreen" : False })
     #cherrypy.config.update({'log.screen': False})
     #cherrypy.server.socket_host = '0.0.0.0'
+    cherrypy.server.socket_port = int(p.port)
     cherrypy.quickstart(FratWebServer(p.images,config_dict=config_dict), '/', conf)
