@@ -1,0 +1,16 @@
+{
+  "name": "frat",
+  "version": "2.1.0",
+  "description": "Fast Rectangle Annotation Tool - Playwright tests",
+  "scripts": {
+    "build": "esbuild frat/resources/src/frat_gui.js --bundle --outfile=frat/resources/frat_gui.js",
+    "build:watch": "esbuild frat/resources/src/frat_gui.js --bundle --watch --outfile=frat/resources/frat_gui.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "esbuild": "^0.21.0"
+  }
+}

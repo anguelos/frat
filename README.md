@@ -23,3 +23,24 @@ cmd:
 ```bash
 docker  run --network host -v  %cd%/sample_data:/opt/frat/sample_data anguelos/frat
 ```
+
+
+cmd
+```bash
+
+```
+
+#### Development Installation
+
+Requires Python 3 and Node.js. The JavaScript frontend is authored as ES modules and bundled with esbuild.
+
+```bash
+make install
+```
+
+This runs `npm install && npm run build` to bundle the JS, then `pip install -e .` for the Python package.
+
+To rebuild the JS after editing files under `frat/resources/src/`:
+```bash
+make build
+```

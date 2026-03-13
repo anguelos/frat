@@ -1,3 +1,6 @@
+# JS testing
+test-results/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,3 +130,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# JS tooling
+node_modules/
+
+# Keep the built bundle committed so pip install works without Node.js
+!frat/resources/frat_gui.js

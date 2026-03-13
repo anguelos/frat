@@ -19,6 +19,11 @@ setup(
     #include_package_data=True,
     package_data={'frat': ['resources/*.*']},
     scripts=['bin/frat', 'bin/frat_config', 'bin/frat_json2png', 'bin/frat_json2coco', 'bin/frat_json2yolov5'],
+    entry_points={
+        'console_scripts': [
+            'frat_preview=frat.static_viewer_html:main_previewer',
+        ],
+    },
     license='GPLv3',
     author='Anguelos Nicolaou',
     author_email='anguelos.nicolaou@gmail.com',
